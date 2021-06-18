@@ -2,8 +2,13 @@
   {{ title }}
 </h1>
 <h2>Users:</h2>
-<div style="background-color: aqua;">
+<div style="background-color: lightsteelblue;">
+  <ul>
+    <li *ngFor="let user of users">
+      <strong>{{user.id}}</strong>&nbsp;<em>{{user.userName}}</em>
+    </li>
+  </ul>
   <pre>
-    {{ users | json}}
+{{ users | json}}
   </pre>
 </div>
