@@ -22,7 +22,7 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        // api/user
+        // api/users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> Get()
         {
