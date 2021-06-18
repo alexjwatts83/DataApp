@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ namespace API.Controllers
 
         // api/users
         [HttpGet]
+        [EnableCors("AllowOrigin")]
         public async Task<ActionResult<IEnumerable<AppUser>>> Get()
         {
             return await _context.Users.ToListAsync().ConfigureAwait(false);
