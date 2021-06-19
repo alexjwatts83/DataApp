@@ -1,5 +1,6 @@
 using System.Text;
 using API.Data;
+using API.Extentions;
 using API.Interface;
 using API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,12 +28,8 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             // Add scoped better than add transient for http requests
-            services.AddScoped<ITokenService, TokenService>();
+            services.AddApplicationServices(_configuration);
 
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlite(_configuration.GetConnectionString("DefaultConnection"));
-            });
             services.AddControllers();
             
             services.AddSwaggerGen(c =>
@@ -44,17 +41,7 @@ namespace API
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["TokenKey"])),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+            services.AddIdentityServices(_configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
