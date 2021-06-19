@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,15 +16,17 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ILogger<AccountController> _logger;
+        private readonly ITokenService _tokenService;
 
-        public AccountController(DataContext context, ILogger<AccountController> logger)
+        public AccountController(DataContext context, ILogger<AccountController> logger, ITokenService tokenService)
         {
             _context = context;
             _logger = logger;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterUserDto registerUserDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterUserDto registerUserDto)
         {
             if (await UserExists(registerUserDto.Username).ConfigureAwait(false))
                 return BadRequest("Username exists");
@@ -39,13 +42,16 @@ namespace API.Controllers
 
             _context.Users.Add(user);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
-            return user;
+            return new UserDto {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginUserDto loginUserDto)
+        public async Task<ActionResult<UserDto>> Login(LoginUserDto loginUserDto)
         {
             var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower());
 
@@ -66,7 +72,11 @@ namespace API.Controllers
                 }
             }
 
-            return Ok(user);
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         private async Task<bool> UserExists(string username)
