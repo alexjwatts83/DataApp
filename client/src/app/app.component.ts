@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
   users: any;
   restApiUrl: string;
   constructor(private httpClient: HttpClient) {
-    this.restApiUrl = 'https://localhost:44304/api/users';
+    this.restApiUrl = 'https://localhost:5001/api/users';
   }
 
   ngOnInit(): void {
