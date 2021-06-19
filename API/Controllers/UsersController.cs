@@ -32,6 +32,7 @@ namespace API.Controllers
 
         // api/users/1
         [Authorize]
+        [EnableCors("AllowOrigin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<AppUser>> GetById(int id)
         {

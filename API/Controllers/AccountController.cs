@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interface;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,6 +27,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
+        [EnableCors("AllowOrigin")]
         public async Task<ActionResult<UserDto>> Register(RegisterUserDto registerUserDto)
         {
             if (await UserExists(registerUserDto.Username).ConfigureAwait(false))
@@ -51,6 +53,7 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
+        [EnableCors("AllowOrigin")]
         public async Task<ActionResult<UserDto>> Login(LoginUserDto loginUserDto)
         {
             var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower());
