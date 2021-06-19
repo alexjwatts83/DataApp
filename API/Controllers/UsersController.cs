@@ -9,15 +9,12 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
-
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseApiController
     {
         private readonly DataContext _context;
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(DataContext context, ILogger<WeatherForecastController> logger)
+        public UsersController(DataContext context, ILogger<UsersController> logger)
         {
             _context = context;
             _logger = logger;
