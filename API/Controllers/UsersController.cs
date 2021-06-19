@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,12 +24,14 @@ namespace API.Controllers
         // api/users
         [HttpGet]
         [EnableCors("AllowOrigin")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<AppUser>>> Get()
         {
             return await _context.Users.ToListAsync().ConfigureAwait(false);
         }
 
         // api/users/1
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<AppUser>> GetById(int id)
         {
