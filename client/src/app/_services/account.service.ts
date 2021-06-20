@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../models/user';
 
@@ -10,7 +10,8 @@ import { User } from '../models/user';
 export class AccountService {
   private baseUrl = 'https://localhost:5001/api/account';
   private currentUserSource = new ReplaySubject<User>(1);
-  currentUserSource$ = this.currentUserSource.asObservable();
+  isLoggedIn$ = new BehaviorSubject<boolean>(false);
+  currentUser$ = this.currentUserSource.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -26,18 +27,28 @@ export class AccountService {
         const user = response;
         if(user) {
           localStorage.setItem('user', JSON.stringify(user));
-          this.currentUserSource.next(user);
+          // this.currentUserSource.next(user);
+          this.setCurrentUser(user);
         }
       })
     );
   }
 
   setCurrentUser(user: User): void {
+    console.log(user);
+    console.log(Object.entries(user));
+    if(user.constructor  === Object) {
+      console.log('user is undefined');
+    }
+    let isLogged = Object.entries(user).length > 0;
+    console.log({isLogged: isLogged});
+    this.isLoggedIn$.next(isLogged);
     this.currentUserSource.next(user);
   }
 
   logout() {
     localStorage.removeItem('user');
     this.currentUserSource.next(undefined);
+    this.isLoggedIn$.next(false);
   }
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { User } from '../models/user';
 import { AccountService } from '../_services/account.service';
 
@@ -9,19 +10,20 @@ import { AccountService } from '../_services/account.service';
 })
 export class NavComponent implements OnInit {
   model: any = {};
-  loggedIn: boolean;
+  currentUser$!: Observable<User>;
+  isLoggedIn$: Observable<boolean>;
   constructor(private accountsService: AccountService) {
-    this.loggedIn = false;
+    this.isLoggedIn$ = of(false);
   }
 
   ngOnInit(): void {
-    this.getCurrentUser();
+    this.currentUser$ = this.accountsService.currentUser$;
+    this.isLoggedIn$ = this.accountsService.isLoggedIn$;
   }
 
   login() {
     this.accountsService.login(this.model).subscribe(data => {
       console.log(data);
-      this.loggedIn = true;
     }, error => {
       console.error(error);
     });
@@ -29,18 +31,5 @@ export class NavComponent implements OnInit {
 
   logout() {
     this.accountsService.logout();
-    this.loggedIn = false;
-  }
-
-  getCurrentUser() {
-    this.accountsService.currentUserSource$.subscribe((user: User) => {
-      // because user can be an an empty object we test if its not null
-      // and if the user name is set
-      console.log({user: user, getCurrentUser: true});
-      this.loggedIn = !!user && !!user.username;
-    },
-    err => {
-      console.error(err);
-    });
   }
 }

@@ -23,8 +23,7 @@ export class AppComponent implements OnInit {
   }
 
   setCurrentUser() {
-    // had to default to an empty object as parse wouldn't allow null
-    const user: User = JSON.parse(localStorage.getItem('user') || '{}');
+    let user: User = JSON.parse(localStorage.getItem('user') || '{}');
     this.accountService.setCurrentUser(user);
   }
 
