@@ -11,14 +11,10 @@ import { AccountService } from './_services/account.service';
 })
 export class AppComponent implements OnInit {
   title = 'Almighty Push';
-  users: any;
-  restApiUrl: string;
-  constructor(private httpClient: HttpClient, private accountService: AccountService) {
-    this.restApiUrl = 'https://localhost:5001/api/users';
+  constructor(private accountService: AccountService) {
   }
 
   ngOnInit(): void {
-    this.loadUsers();
     this.setCurrentUser();
   }
 
@@ -27,10 +23,4 @@ export class AppComponent implements OnInit {
     this.accountService.setCurrentUser(user);
   }
 
-  loadUsers() {
-    this.httpClient.get(this.restApiUrl).subscribe((data : any) => {
-      this.users = data;
-    });
-    console.log({users: this.users});
-  }
 }
