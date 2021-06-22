@@ -51,4 +51,20 @@ export class AccountService {
     this.currentUserSource.next(undefined);
     this.isLoggedIn$.next(false);
   }
+
+  register(model: any) {
+    console.log('calling register with model', model);
+    return this.http.post<User>(this.getUrl('register'), model)
+    .pipe(
+      map((user: User) => {
+        console.log('api call successful', user);
+        if(user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          // this.currentUserSource.next(user);
+          this.setCurrentUser(user);
+        }
+        return user;
+      })
+    );
+  }
 }
