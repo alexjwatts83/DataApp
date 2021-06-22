@@ -30,4 +30,8 @@ export class HomeComponent implements OnInit {
       console.error('Failed like a boss retrieving users', err);
     })
   }
+
+  cancelRegisterMode(event: boolean) {
+    this.registerMode = event;
+  }
 }
