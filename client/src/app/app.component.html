@@ -1,17 +1,6 @@
 <app-nav></app-nav>
 <main role="main" style="margin-top: 100px;">
   <div class="container">
-    <app-home></app-home>
-    <!-- <h2>Users:</h2>
-    <div style="background-color: lightsteelblue;">
-      <ul>
-        <li *ngFor="let user of users">
-          <strong>{{user.id}}</strong>&nbsp;<em>{{user.userName}}</em>
-        </li>
-      </ul>
-      <pre>
-    {{ users | json}}
-      </pre>
-    </div> -->
+    <router-outlet></router-outlet>
   </div>
 </main>
