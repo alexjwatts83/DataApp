@@ -17,7 +17,7 @@
       </ul>
       
       <div class="dropdown" dropdown *ngIf="isLoggedIn$ | async">
-        <a class="dropdown-toggle text-light" dropdownToggle>Welcome <strong>{{(currentUser$ | async)?.username}}</strong></a>
+        <a class="dropdown-toggle text-light" dropdownToggle>Welcome <strong>{{(currentUser$ | async)?.username | titlecase}}</strong></a>
         <ul *dropdownMenu class="dropdown-menu mt-3">
           <a class="dropdown-item">Edit Profile</a>
           <div class="divider dropdown-divider"></div>
@@ -46,7 +46,7 @@
           type="password"
           placeholder="Password"
         />
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+        <button class="btn btn-success my-2 my-sm-0" type="submit">
           Login
         </button>
       </form>
