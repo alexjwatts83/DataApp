@@ -1,10 +1,12 @@
 ﻿using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [EnableCors("AllowOrigin")]
     public class BuggyController : BaseApiController
     {
         private readonly DataContext _context;
