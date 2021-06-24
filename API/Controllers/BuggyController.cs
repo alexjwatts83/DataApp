@@ -31,9 +31,16 @@ namespace API.Controllers
         [HttpGet("server-error")]
         public ActionResult<string> GetServerError()
         {
-            var thing = _context.Users.Find(-1);
-            var something = thing.ToString();
-            return Ok(something);
+            try
+            {
+                var thing = _context.Users.Find(-1);
+                var something = thing.ToString();
+                return Ok(something);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, "Lols, you got an error: " + ex.Message);
+            }
         }
 
         [HttpGet("bad-request")]
