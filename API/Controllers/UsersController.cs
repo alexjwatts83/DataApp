@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
+    [Authorize]
+    [EnableCors("AllowOrigin")]
     public class UsersController : BaseApiController
     {
         private readonly DataContext _context;
@@ -23,16 +25,12 @@ namespace API.Controllers
 
         // api/users
         [HttpGet]
-        [EnableCors("AllowOrigin")]
-        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<AppUser>>> Get()
         {
             return await _context.Users.ToListAsync().ConfigureAwait(false);
         }
 
         // api/users/1
-        [Authorize]
-        [EnableCors("AllowOrigin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<AppUser>> GetById(int id)
         {
