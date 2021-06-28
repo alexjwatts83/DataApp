@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +15,12 @@ namespace API.Controllers
     [EnableCors("AllowOrigin")]
     public class UsersController : BaseApiController
     {
-        private readonly DataContext _context;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(DataContext context, ILogger<UsersController> logger)
+        public UsersController(IUserRepository userRepository, ILogger<UsersController> logger)
         {
-            _context = context;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -27,14 +28,15 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> Get()
         {
-            return await _context.Users.ToListAsync().ConfigureAwait(false);
+            var users = await _userRepository.GetUsersAsync().ConfigureAwait(false);
+            return Ok(users);
         }
 
-        // api/users/1
-        [HttpGet("{id}")]
-        public async Task<ActionResult<AppUser>> GetById(int id)
+        // api/users/elle
+        [HttpGet("{username}")]
+        public async Task<ActionResult<AppUser>> GetById(string username)
         {
-            return await _context.Users.FindAsync(id).ConfigureAwait(false);
+            return await _userRepository.GerUserByUsernameAsync(username).ConfigureAwait(false);
         }
     }
 }
