@@ -7,10 +7,7 @@ namespace API.DTOs
     {
         public int Id { get; set; }
         public string Username { get; set; }
-
         public string PhotoUrl { get; set; }
-
-        // Automapper detects that there is a method named GetAge and uses then to set the Age
         public int Age { get; set; }
         public string KnownAs { get; set; }
         public DateTime Created { get; set; }
