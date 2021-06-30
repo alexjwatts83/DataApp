@@ -1,12 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Member } from '../models/member';
 
 const httpOptions = {
   headers: new HttpHeaders({
-    Authorization: `Bearer ${JSON.parse(JSON.parse(localStorage.getItem('user') || `{token: '' }`).token)}`
+    Authorization: `Bearer ${(JSON.parse(localStorage.getItem('user') || `{}`).token)}`
   })
 }
 
@@ -15,7 +14,9 @@ const httpOptions = {
 })
 export class MembersService {
   private baseUrl = `${environment.apiUrl}/users`;
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    console.log(httpOptions);
+  }
 
   private getUrl(path: string): string {
     return `${this.baseUrl}/${path}`;
