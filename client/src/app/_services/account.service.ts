@@ -1,14 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { User } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
-  private baseUrl = 'https://localhost:5001/api/account';
+  private baseUrl = `${environment.apiUrl}/account`;
   private currentUserSource = new ReplaySubject<User>(1);
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   currentUser$ = this.currentUserSource.asObservable();
