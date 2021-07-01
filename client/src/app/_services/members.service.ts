@@ -20,6 +20,6 @@ export class MembersService {
   }
 
   getMember(username: string) {
-    return this.http.get<Member[]>(this.getUrl(username));
+    return this.http.get<Member>(this.getUrl(username));
   }
 }
