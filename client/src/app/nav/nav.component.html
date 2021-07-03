@@ -22,7 +22,7 @@
       <div class="dropdown" dropdown *ngIf="isLoggedIn$ | async">
         <a class="dropdown-toggle text-light" dropdownToggle>Welcome <strong>{{(currentUser$ | async)?.username | titlecase}}</strong></a>
         <ul *dropdownMenu class="dropdown-menu mt-3">
-          <a class="dropdown-item">Edit Profile</a>
+          <a class="dropdown-item" routerLink="member/edit/{{(currentUser$ | async)?.username}}">Edit Profile</a>
           <div class="divider dropdown-divider"></div>
           <a class="dropdown-item" (click)="logout()">Logout</a>
         </ul>
