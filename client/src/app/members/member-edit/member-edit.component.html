@@ -1,5 +1,5 @@
 <div class="row" *ngIf="member">
-  <div class="col-4"><h3>Your Profile</h3></div>
+  <div class="col-4"><h3>Your Profile, {{member.knownAs}}</h3></div>
   <div class="col-8">
     <div class="alert alert-warning" *ngIf="editForm.dirty">
       <strong>Warning:</strong>&nbsp; You have made changes. Any unsaved changes will be lost.
