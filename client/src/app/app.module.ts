@@ -22,7 +22,7 @@ import { MemberCardComponent } from './members/member-card/member-card.component
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { NgxgalModule } from './_modules/ngxgal.module';
 import { MemberEditComponent } from './members/member-edit/member-edit.component';
-
+import { NgxSpinnerModule } from "ngx-spinner";
 
 @NgModule({
   declarations: [
@@ -47,8 +47,8 @@ import { MemberEditComponent } from './members/member-edit/member-edit.component
     BrowserAnimationsModule,
     FormsModule,
     SharedModule,
-    NgxgalModule
-    // NgxGalleryModule
+    NgxgalModule,
+    NgxSpinnerModule,
   ],
   providers: [
     {
