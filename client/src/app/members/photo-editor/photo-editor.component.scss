@@ -1,0 +1,14 @@
+img.image-thumbnail {
+  height: 100px;
+  min-width: 100px !important;
+  margin-bottom: 2px;
+}
+
+.nv-file-over {
+  border: dotted 3px red;
+}
+
+// Hides the text No file choosen
+input[type=file] {
+  color: transparent;
+}
