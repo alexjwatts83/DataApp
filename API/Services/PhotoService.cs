@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Helpers;
 using API.Interface;
 using CloudinaryDotNet;
@@ -15,15 +14,36 @@ namespace API.Services
         public PhotoService(IOptions<CloudinarySettings> config)
         {
             var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
+            _cloudinary = new Cloudinary(acc);
         }
-        public Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
+        public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
         {
-            throw new NotImplementedException();
+            if(file.Length == 0)
+            {
+                return new ImageUploadResult();
+            }
+            using var stream = file.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Transformation = new Transformation()
+                    .Height(500)
+                    .Width(500)
+                    .Crop("fill")
+                    .Gravity("face")
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false);
+
+            return uploadResult;
         }
 
-        public Task<DeletionResult> DeletePhotoAsync(string publicId)
+        public async Task<DeletionResult> DeletePhotoAsync(string publicId)
         {
-            throw new NotImplementedException();
+            var deleteParams = new DeletionParams(publicId);
+            var result = await _cloudinary.DestroyAsync(deleteParams).ConfigureAwait(false);
+
+            return result;
         }
     }
 }

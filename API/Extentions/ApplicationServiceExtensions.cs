@@ -12,13 +12,11 @@ namespace API.Extentions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var section = configuration.GetSection("CloudinarySettings");
-            var cloudName = section.GetSection("CloudName");
             services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
 
             services.AddScoped<ITokenService, TokenService>();
-
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPhotoService, PhotoService>();
 
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
@@ -26,6 +24,7 @@ namespace API.Extentions
             {
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
             });
+
             return services;
         }
     }
