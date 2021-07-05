@@ -37,7 +37,7 @@ namespace API.Controllers
         }
 
         // api/users/elle
-        [HttpGet("{username}")]
+        [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetByUsername(string username)
         {
             return await _userRepository.GetMemberAsync(username).ConfigureAwait(false);
@@ -90,7 +90,7 @@ namespace API.Controllers
 
             if(await _userRepository.SallAllAsync())
             {
-                return _mapper.Map<PhotoDto>(photo);
+                return CreatedAtRoute("GetUser", new { username = User.GetUsername() }, _mapper.Map<PhotoDto>(photo));
             }
 
             return BadRequest("Failed to add photo to user, lols");
