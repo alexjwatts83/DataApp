@@ -63,6 +63,10 @@ namespace API.Controllers
         [HttpPost("add-photo")]
         public async Task<ActionResult<PhotoDto>> AddPhoto(IFormFile file)
         {
+            if(file == null)
+            {
+                return BadRequest("No file lols");
+            }
             var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
             var result = await _photoService.AddPhotoAsync(file);
 
