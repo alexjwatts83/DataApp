@@ -4,7 +4,8 @@
     [formControl]="$any(ngControl).control"
     [type]="type" 
     class="form-control" 
-    [placeholder]="label" />
+    [placeholder]="label"
+    [autocomplete]='type === "password" ? "new-password" : "off"' />
 
   <div *ngIf="ngControl.control?.errors?.required" class="invalid-feedback">Please enter in a {{ label }}</div>
   <div *ngIf="ngControl.control?.errors?.minlength" class="invalid-feedback">
