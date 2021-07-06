@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../_services/account.service';
 
@@ -10,25 +11,37 @@ import { AccountService } from '../_services/account.service';
 export class RegisterComponent implements OnInit {
   @Output() cancelRegister = new EventEmitter<boolean>();
   model: any = {};
+  registerForm!: FormGroup;
 
   constructor(private accounterService: AccountService, private toastr: ToastrService) { 
   }
 
   ngOnInit(): void {
+    this.initForm()
+  }
+
+  initForm() {
+    this.registerForm = new FormGroup({
+      username: new FormControl(),
+      password: new FormControl(),
+      confirmPassword: new FormControl()
+    });
   }
 
   register() {
-    console.log('register', this.model);
-    this.accounterService
-      .register(this.model)
-      .subscribe((response: any) => {
-        console.log('service register call sucessful', response);
-        this.cancel();
-      }, 
-      err => {
-        console.error(err)
-        this.toastr.error(err.error);
-      });
+    console.log({form: this.registerForm});
+    
+    // console.log('register', this.model);
+    // this.accounterService
+    //   .register(this.model)
+    //   .subscribe((response: any) => {
+    //     console.log('service register call sucessful', response);
+    //     this.cancel();
+    //   }, 
+    //   err => {
+    //     console.error(err)
+    //     this.toastr.error(err.error);
+    //   });
   }
 
   cancel() {
