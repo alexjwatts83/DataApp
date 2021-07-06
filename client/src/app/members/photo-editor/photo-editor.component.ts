@@ -57,6 +57,9 @@ export class PhotoEditorComponent implements OnInit {
   }
 
   setMainPhoto(photo: Photo) {
+    if(photo == null) {
+      return;
+    }
     this.memberService.setMainPhoto(photo.id).subscribe(()=>{
       this.user.photoUrl = photo.url;
       this.accountService.setCurrentUser(this.user);
@@ -69,6 +72,15 @@ export class PhotoEditorComponent implements OnInit {
           p.isMain = true;
         }
       });
+    });
+  }
+
+  deletePhoto(photo: Photo) {
+    if(photo == null) {
+      return;
+    }
+    this.memberService.deletePhoto(photo.id).subscribe(()=> {
+      this.member.photos = this.member.photos.filter(x => x.id !== photo.id);
     });
   }
 }

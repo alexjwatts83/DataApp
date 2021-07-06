@@ -143,7 +143,7 @@ namespace API.Controllers
 
             if (photo.IsMain)
             {
-                return BadRequest($"You cannot delete your main photo");
+                return BadRequest("You cannot delete your main photo");
             }
 
             if (photo.PublicId == null)
