@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -52,7 +53,40 @@ namespace API.Controllers
 
             _userRepository.Update(user);
 
-            if(await _userRepository.SallAllAsync())
+            if(await _userRepository.SallAllAsync().ConfigureAwait(false))
+            {
+                return NoContent();
+            }
+
+            return BadRequest("Failed to update user");
+        }
+
+        [HttpPut("set-main-photo/{photoId}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
+            var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
+            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            
+            if(photo == null)
+            {
+                return BadRequest($"Cannot find photo with id of '{photoId}'");
+            }
+
+            if(photo.IsMain)
+            {
+                return BadRequest($"Photo with id of '{photoId}' is already the main photo");
+            }
+
+            var photoMain = user.Photos.FirstOrDefault(x => x.IsMain);
+
+            if (photo != null)
+            {
+                photoMain.IsMain = false;
+            }
+
+            photo.IsMain = true;
+
+            if (await _userRepository.SallAllAsync().ConfigureAwait(false))
             {
                 return NoContent();
             }
