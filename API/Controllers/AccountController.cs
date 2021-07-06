@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using API.Data;
@@ -56,7 +57,9 @@ namespace API.Controllers
         [EnableCors("AllowOrigin")]
         public async Task<ActionResult<UserDto>> Login(LoginUserDto loginUserDto)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower());
+            var user = await _context.Users
+                .Include(x => x.Photos)
+                .SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower());
 
             if (user == null)
             {
@@ -75,10 +78,15 @@ namespace API.Controllers
                 }
             }
 
+            var photos = user.Photos;
+            var mainPhoto = photos?.FirstOrDefault(x => x.IsMain);
+            var photoUrl = mainPhoto == null ? string.Empty : mainPhoto.Url;
+
             return new UserDto
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                PhotoUrl = photos?.FirstOrDefault(x => x.IsMain)?.Url
             };
         }
 

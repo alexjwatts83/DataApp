@@ -20,6 +20,7 @@
       </ul>
       
       <div class="dropdown" dropdown *ngIf="isLoggedIn$ | async">
+        <img class="avatar mr-sm-2" src="{{(currentUser$ | async)?.photoUrl}}" alt="{{(currentUser$ | async)?.username}}" />
         <a class="dropdown-toggle text-light" dropdownToggle>Welcome <strong>{{(currentUser$ | async)?.username | titlecase}}</strong></a>
         <ul *dropdownMenu class="dropdown-menu mt-3">
           <a class="dropdown-item" routerLink="member/edit/{{(currentUser$ | async)?.username}}">Edit Profile</a>

@@ -11,6 +11,7 @@ import { User } from '../models/user';
 export class AccountService {
   private baseUrl = `${environment.apiUrl}/account`;
   private currentUserSource = new ReplaySubject<User>(1);
+
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   currentUser$ = this.currentUserSource.asObservable();
 
@@ -24,11 +25,8 @@ export class AccountService {
     return this.http
     .post<User>(this.getUrl('login'), model)
     .pipe(
-      map((response: User) => {
-        const user = response;
+      map((user: User) => {
         if(user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          // this.currentUserSource.next(user);
           this.setCurrentUser(user);
         }
       })
@@ -44,6 +42,7 @@ export class AccountService {
     let isLogged = Object.entries(user).length > 0;
     console.log({isLogged: isLogged});
     this.isLoggedIn$.next(isLogged);
+    localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
   }
 
@@ -60,8 +59,6 @@ export class AccountService {
       map((user: User) => {
         console.log('api call successful', user);
         if(user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          // this.currentUserSource.next(user);
           this.setCurrentUser(user);
         }
         return user;
