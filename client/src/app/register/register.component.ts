@@ -7,6 +7,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AccountService } from '../_services/account.service';
 
 @Component({
@@ -17,13 +18,17 @@ import { AccountService } from '../_services/account.service';
 export class RegisterComponent implements OnInit {
   @Output() cancelRegister = new EventEmitter<boolean>();
 
-  model: any = {};
   registerForm!: FormGroup;
   maxDate: Date;
+  validationErrors: string[];
 
-  constructor(private accounterService: AccountService, private fb: FormBuilder) {
+  constructor(
+      private accounterService: AccountService,
+      private fb: FormBuilder,
+      private router: Router) {
     this.maxDate = new Date();
     this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
+    this.validationErrors = [];
   }
 
   ngOnInit(): void {
@@ -59,18 +64,16 @@ export class RegisterComponent implements OnInit {
 
   register() {
     console.log({ form: this.registerForm });
-
-    // console.log('register', this.model);
-    // this.accounterService
-    //   .register(this.model)
-    //   .subscribe((response: any) => {
-    //     console.log('service register call sucessful', response);
-    //     this.cancel();
-    //   },
-    //   err => {
-    //     console.error(err)
-    //     this.toastr.error(err.error);
-    //   });
+    this.accounterService
+      .register(this.registerForm.value)
+      .subscribe((response: any) => {
+        console.log('service register call sucessful', response);
+        this.router.navigateByUrl('/members');
+      },
+      err => {
+        console.error(err);
+        this.validationErrors = err;
+      });
   }
 
   cancel() {
