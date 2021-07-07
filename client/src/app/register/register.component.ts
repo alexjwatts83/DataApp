@@ -19,9 +19,11 @@ export class RegisterComponent implements OnInit {
 
   model: any = {};
   registerForm!: FormGroup;
+  maxDate: Date;
 
   constructor(private accounterService: AccountService, private fb: FormBuilder) {
-
+    this.maxDate = new Date();
+    this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
   }
 
   ngOnInit(): void {
