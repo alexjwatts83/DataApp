@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import {
   AbstractControl,
-  FormControl,
+  FormBuilder,
   FormGroup,
   ValidationErrors,
   ValidatorFn,
@@ -20,7 +20,7 @@ export class RegisterComponent implements OnInit {
   model: any = {};
   registerForm!: FormGroup;
 
-  constructor(private accounterService: AccountService) {
+  constructor(private accounterService: AccountService, private fb: FormBuilder) {
 
   }
 
@@ -29,18 +29,19 @@ export class RegisterComponent implements OnInit {
   }
 
   initForm() {
-    this.registerForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [
+    this.registerForm = this.fb.group({
+      username: ['', [Validators.required]],
+      password: ['', [
         Validators.required,
         Validators.minLength(4),
         Validators.maxLength(8),
-      ]),
-      confirmPassword: new FormControl('', [
+      ]],
+      confirmPassword: ['', [
         Validators.required,
         this.matchValuesValidator('password'),
-      ]),
+      ]],
     });
+
     this.registerForm.controls.password.valueChanges.subscribe(() => {
       this.registerForm.controls.confirmPassword.updateValueAndValidity();
     });

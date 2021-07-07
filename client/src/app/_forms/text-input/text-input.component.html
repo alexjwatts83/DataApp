@@ -9,10 +9,10 @@
 
   <div *ngIf="ngControl.control?.errors?.required" class="invalid-feedback">Please enter in a {{ label }}</div>
   <div *ngIf="ngControl.control?.errors?.minlength" class="invalid-feedback">
-    {{ label }} must be at least {{ ngControl.control?.errors?.minlength['requiredLength'] }}
+    {{ label }} must be at least {{ ngControl.control?.errors?.minlength['requiredLength'] }} characters
   </div>
   <div *ngIf="ngControl.control?.errors?.maxlength" class="invalid-feedback">
-    {{ label }} must be at most {{ ngControl.control?.errors?.maxlength['requiredLength'] }}
+    {{ label }} must be at most {{ ngControl.control?.errors?.maxlength['requiredLength'] }} characters
   </div>
   <div *ngIf="ngControl.control?.errors?.isMatched" class="invalid-feedback">
     Passords don't match, lols
