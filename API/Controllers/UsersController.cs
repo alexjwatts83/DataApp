@@ -34,7 +34,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<MemberDto>>> Get([FromQuery] UserParams userParams)
         {
             var username = User.GetUsername();
-            var user = await _userRepository.GerUserByUsernameAsync(username).ConfigureAwait(false);
+            var user = await _userRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
             userParams.CurrentUsername = username;
             if(string.IsNullOrEmpty(userParams.Gender))
             {
@@ -62,7 +62,7 @@ namespace API.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
         {
-            var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
 
             _mapper.Map(memberUpdateDto, user);
 
@@ -79,7 +79,7 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
             
             if(photo == null)
@@ -116,7 +116,7 @@ namespace API.Controllers
             {
                 return BadRequest("No file lols");
             }
-            var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
             var result = await _photoService.AddPhotoAsync(file);
 
             if(result.Error != null)
@@ -148,7 +148,7 @@ namespace API.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var user = await _userRepository.GerUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername()).ConfigureAwait(false);
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 

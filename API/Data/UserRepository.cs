@@ -23,7 +23,7 @@ namespace API.Data
             _context = context;
             _mapper = mapper;
         }
-        public async Task<AppUser> GerUserByIdAsync(int id)
+        public async Task<AppUser> GetUserByIdAsync(int id)
         {
             return await _context
                 .Users
@@ -31,7 +31,7 @@ namespace API.Data
                 .ConfigureAwait(false);
         }
 
-        public async Task<AppUser> GerUserByUsernameAsync(string username)
+        public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
             return await _context
                 .Users

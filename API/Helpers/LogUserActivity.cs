@@ -18,13 +18,13 @@ namespace API.Helpers
                 return;
             }
 
-            var username = resultContenxt.HttpContext.User.GetUsername();
+            var userId = resultContenxt.HttpContext.User.GetUserId();
             var respository = resultContenxt.HttpContext.RequestServices.GetService<IUserRepository>();
-            var user = await respository.GerUserByUsernameAsync(username).ConfigureAwait(false);
+            var user = await respository.GetUserByIdAsync(userId).ConfigureAwait(false);
 
             user.LastActive = DateTime.Now;
 
-            await respository.SallAllAsync();
+            await respository.SallAllAsync().ConfigureAwait(false);
         }
     }
 }
