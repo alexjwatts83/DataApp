@@ -5,66 +5,81 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Member } from '../models/member';
 import { PaginatedResult } from '../models/pagination';
+import { UserParams } from '../models/usersParams';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MembersService {
   private baseUrl = `${environment.apiUrl}/users`;
   members: Member[] = [];
-  paginatedResult: PaginatedResult<Member[]> = new PaginatedResult<Member[]>();
 
-  constructor(private http: HttpClient) { 
-  }
+  constructor(private http: HttpClient) {}
 
   private getUrl(path: string): string {
     return `${this.baseUrl}/${path}`;
   }
 
-  getMembers(page?: number, itemsPerPage?: number) {
+  private getPaginationHeaders(pageNumber: number, pageSize: number) {
     let params = new HttpParams();
 
-    if (page != null && itemsPerPage != null) {
-      params =  params.append('pageNumber', page.toString());
-      params = params.append('pageSize', itemsPerPage.toString());
-    }
+    params = params.append('pageNumber', pageNumber.toString());
+    params = params.append('pageSize', pageSize.toString());
 
-    return this.http
-      .get<Member[]>(this.baseUrl, { observe: 'response', params})
-      .pipe(map(response=> {
+    return params;
+  }
+
+  private getPaginatedResults<T>(url: string, params: HttpParams) {
+    const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
+    return this.http.get<T>(url, { observe: 'response', params }).pipe(
+      map((response) => {
         // console.log('response from member service', response);
-        this.paginatedResult.result = response.body || undefined;
+        paginatedResult.result = response.body || undefined;
         // console.log(this.paginatedResult);
-        if(response.headers.get('Pagination') != null) {
-          this.paginatedResult.pagination = JSON.parse(response.headers.get('Pagination') || '{}') || undefined;
+        if (response.headers.get('Pagination') != null) {
+          paginatedResult.pagination =
+            JSON.parse(response.headers.get('Pagination') || '{}') || undefined;
         }
-        return this.paginatedResult;
-      }));
+        return paginatedResult;
+      })
+    );
+  }
+
+  getMembers(userParams: UserParams) {
+    let params = this.getPaginationHeaders(
+      userParams.pageNumber,
+      userParams.pageSize
+    );
+
+    params = params.append('minAge', userParams.minAge.toString());
+    params = params.append('maxAge', userParams.maxAge.toString());
+    params = params.append('gender', userParams.gender);
+
+    return this.getPaginatedResults<Member[]>(this.baseUrl, params);
   }
 
   getMember(username: string) {
-    const member =  this.members.find(x => x.username === username);
-    if(member != null) {
+    const member = this.members.find((x) => x.username === username);
+    if (member != null) {
       return of(member);
     }
     return this.http.get<Member>(this.getUrl(username));
   }
 
   updateMember(member: Member) {
-    return this.http
-      .put(this.baseUrl, member)
-      .pipe(map(() => {
+    return this.http.put(this.baseUrl, member).pipe(
+      map(() => {
         const index = this.members.indexOf(member);
         this.members[index] = member;
-      }));
+      })
+    );
   }
 
   setMainPhoto(photoId: number) {
-    return this.http
-      .put(this.getUrl(`set-main-photo/${photoId}`), {});
+    return this.http.put(this.getUrl(`set-main-photo/${photoId}`), {});
   }
 
-  deletePhoto(photoId: number){
-    return this.http.delete(this.getUrl(`delete-photo/${photoId}`))
+  deletePhoto(photoId: number) {
+    return this.http.delete(this.getUrl(`delete-photo/${photoId}`));
   }
 }
