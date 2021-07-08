@@ -53,11 +53,15 @@ namespace API.Data
         {
             var query = _context
                 .Users
-                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking();
+                .AsQueryable();
+
+            query = query.Where(u => u.UserName != userParams.CurrentUsername);
+            query = query.Where(u => u.Gender == userParams.Gender);
 
             return await PagedList<MemberDto>
-                .CreateAsync(query, userParams.PageNumber, userParams.PageSize)
+                .CreateAsync(query
+                    .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
+                    .AsNoTracking(), userParams.PageNumber, userParams.PageSize)
                 .ConfigureAwait(false);
         }
 
