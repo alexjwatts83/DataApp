@@ -68,6 +68,7 @@ namespace API.Data
             query = userParams.OrderBy switch
             {
                 "created" => query.OrderByDescending(x => x.Created),
+                "age" => query.OrderByDescending(x => x.DateOfBirth),
                 _ => query.OrderByDescending(x => x.LastActive)
             };
 
