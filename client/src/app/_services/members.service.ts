@@ -13,6 +13,7 @@ import { UserParams } from '../models/usersParams';
 export class MembersService {
   private baseUrl = `${environment.apiUrl}/users`;
   members: Member[] = [];
+  memberCache = new Map();
 
   constructor(private http: HttpClient) {}
 
@@ -27,6 +28,10 @@ export class MembersService {
     params = params.append('pageSize', pageSize.toString());
 
     return params;
+  }
+
+  private convertToKey(userParams: UserParams) {
+    return Object.values(userParams).join('-')
   }
 
   private getPaginatedResults<T>(url: string, params: HttpParams) {
@@ -46,6 +51,11 @@ export class MembersService {
   }
 
   getMembers(userParams: UserParams) {
+    var response = this.memberCache.get(this.convertToKey(userParams));
+    if(response){
+      return of(response);
+    }
+
     let params = this.getPaginationHeaders(
       userParams.pageNumber,
       userParams.pageSize
@@ -56,7 +66,10 @@ export class MembersService {
     params = params.append('gender', userParams.gender);
     params = params.append('orderBy', userParams.orderBy);
 
-    return this.getPaginatedResults<Member[]>(this.baseUrl, params);
+    return this.getPaginatedResults<Member[]>(this.baseUrl, params).pipe(map(response => {
+      this.memberCache.set(this.convertToKey(userParams), response);
+      return response;
+    }));
   }
 
   getMember(username: string) {
