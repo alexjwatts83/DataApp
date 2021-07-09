@@ -68,7 +68,7 @@ namespace API.Controllers
 
             _userRepository.Update(user);
 
-            if(await _userRepository.SallAllAsync().ConfigureAwait(false))
+            if(await _userRepository.SaveAllAsync().ConfigureAwait(false))
             {
                 return NoContent();
             }
@@ -101,7 +101,7 @@ namespace API.Controllers
 
             photo.IsMain = true;
 
-            if (await _userRepository.SallAllAsync().ConfigureAwait(false))
+            if (await _userRepository.SaveAllAsync().ConfigureAwait(false))
             {
                 return NoContent();
             }
@@ -137,7 +137,7 @@ namespace API.Controllers
 
             user.Photos.Add(photo);
 
-            if(await _userRepository.SallAllAsync())
+            if(await _userRepository.SaveAllAsync())
             {
                 return CreatedAtRoute("GetUser", new { username = User.GetUsername() }, _mapper.Map<PhotoDto>(photo));
             }
@@ -176,7 +176,7 @@ namespace API.Controllers
 
             user.Photos.Remove(photo);
 
-            if (await _userRepository.SallAllAsync().ConfigureAwait(false))
+            if (await _userRepository.SaveAllAsync().ConfigureAwait(false))
             {
                 return Ok();
             }

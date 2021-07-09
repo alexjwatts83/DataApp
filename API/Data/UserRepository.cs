@@ -9,6 +9,7 @@ using API.Interface;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -17,11 +18,13 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(DataContext context, IMapper mapper)
+        public UserRepository(DataContext context, IMapper mapper, ILogger<UserRepository> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task<AppUser> GetUserByIdAsync(int id)
         {
@@ -72,6 +75,12 @@ namespace API.Data
                 _ => query.OrderByDescending(x => x.LastActive)
             };
 
+            _logger.LogInformation($"********************CurrentUsername:{userParams.CurrentUsername}********************");
+            _logger.LogInformation($"********************Gender:{userParams.Gender}********************");
+            _logger.LogInformation($"********************MaxAge:{userParams.MaxAge}********************");
+            _logger.LogInformation($"********************MinAge:{userParams.MinAge}********************");
+            _logger.LogInformation($"********************OrderBy:{userParams.OrderBy}********************");
+
             return await PagedList<MemberDto>
                 .CreateAsync(query
                     .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
@@ -88,7 +97,7 @@ namespace API.Data
                 .ConfigureAwait(false);
         }
 
-        public async Task<bool> SallAllAsync()
+        public async Task<bool> SaveAllAsync()
         {
             return await _context.SaveChangesAsync() > 0;
         }

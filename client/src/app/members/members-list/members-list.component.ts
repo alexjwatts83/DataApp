@@ -33,6 +33,7 @@ export class MembersListComponent implements OnInit {
   }
 
   loadMembers() {
+    // console.log({userparams: this.userParams, orderby: this.userParams.orderBy});
     this.memberService.getMembers(this.userParams).subscribe((response: PaginatedResult<Member[]>) => {
       // console.log('response', response);
       if(response.result != null){

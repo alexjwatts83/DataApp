@@ -24,7 +24,7 @@ namespace API.Helpers
 
             user.LastActive = DateTime.Now;
 
-            await respository.SallAllAsync().ConfigureAwait(false);
+            await respository.SaveAllAsync().ConfigureAwait(false);
         }
     }
 }
