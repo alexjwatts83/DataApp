@@ -31,7 +31,7 @@ export class MembersService {
   }
 
   private convertToKey(userParams: UserParams) {
-    return Object.values(userParams).join('-')
+    return Object.values(userParams).join('-');
   }
 
   private getPaginatedResults<T>(url: string, params: HttpParams) {
@@ -52,7 +52,7 @@ export class MembersService {
 
   getMembers(userParams: UserParams) {
     var response = this.memberCache.get(this.convertToKey(userParams));
-    if(response){
+    if (response) {
       return of(response);
     }
 
@@ -66,17 +66,26 @@ export class MembersService {
     params = params.append('gender', userParams.gender);
     params = params.append('orderBy', userParams.orderBy);
 
-    return this.getPaginatedResults<Member[]>(this.baseUrl, params).pipe(map(response => {
-      this.memberCache.set(this.convertToKey(userParams), response);
-      return response;
-    }));
+    return this.getPaginatedResults<Member[]>(this.baseUrl, params).pipe(
+      map((response) => {
+        this.memberCache.set(this.convertToKey(userParams), response);
+        return response;
+      })
+    );
   }
 
   getMember(username: string) {
-    const member = this.members.find((x) => x.username === username);
+    const members = [...this.memberCache.values()].reduce(
+      (arr, elem) => arr.concat(elem.result),
+      []
+    );
+
+    // console.log({ members: members });
+    const member = members.find((x: Member) => x.username === username);
     if (member != null) {
       return of(member);
     }
+    
     return this.http.get<Member>(this.getUrl(username));
   }
 
