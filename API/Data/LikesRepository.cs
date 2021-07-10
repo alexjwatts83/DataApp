@@ -7,6 +7,7 @@ using API.Entities;
 using API.Extentions;
 using API.Interface;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -51,17 +52,8 @@ namespace API.Data
                 users = likes.Select(like => like.SourceUser);
             }
 
-            // TODO: add to IMapper later on
             return await users
-                //.Include(x => x.Photos) // TODO: double check if this is actually needed
-                .Select(user => new LikeDto() {
-                    Username = user.UserName,
-                    KnownAs = user.KnownAs,
-                    Age = user.DateOfBirth.CalculateAge(),
-                    City = user.City,
-                    Id = user.Id,
-                    PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain).Url
-                })
+                .ProjectTo<LikeDto>(_mapper.ConfigurationProvider)
                 .ToListAsync()
                 .ConfigureAwait(false);
         }
