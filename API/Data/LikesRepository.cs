@@ -34,6 +34,10 @@ namespace API.Data
 
         public async Task<IEnumerable<LikeDto>> GetUserLikes(string predicate, int userId)
         {
+            _logger.LogInformation($"****************************************");
+            _logger.LogInformation($"********************predicate:{predicate}, userId:{userId}********************");
+            _logger.LogInformation($"****************************************");
+
             var users = _context.Users.OrderBy(x => x.UserName).AsQueryable();
             var likes = _context.Likes.AsQueryable();
             if(predicate == "liked")
@@ -49,7 +53,7 @@ namespace API.Data
 
             // TODO: add to IMapper later on
             return await users
-                .Include(x => x.Photos) // TODO: double check if this is actually needed
+                //.Include(x => x.Photos) // TODO: double check if this is actually needed
                 .Select(user => new LikeDto() {
                     Username = user.UserName,
                     KnownAs = user.KnownAs,
@@ -67,6 +71,7 @@ namespace API.Data
             return await _context
                 .Users
                 .Include(x => x.LikedByUsers)
+                .Include(x => x.LikedUsers)
                 .FirstOrDefaultAsync(x => x.Id == userId)
                 .ConfigureAwait(false);
         }
