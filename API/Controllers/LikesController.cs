@@ -1,19 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extentions;
 using API.Interface;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -58,7 +51,7 @@ namespace API.Controllers
 
             if(userLike != null)
             {
-                return BadRequest($"{sourceUser.KnownAs}, you already liked this user");
+                return BadRequest($"{sourceUser.KnownAs}, you already liked {likedUser.KnownAs}");
             }
 
             _logger.LogInformation($"********************SourceUserId:{sourceUserId},LikedUserId:{likedUser.Id}********************");
