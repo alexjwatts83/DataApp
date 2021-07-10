@@ -12,7 +12,7 @@ namespace API.Interface
         void DeleteMessage(Message message);
         Task<Message> GetMessageAsync(int id);
         Task<PagedList<MessageDto>> GetMessagesForUserAsync(MessageParams messageParams);
-        Task<IEnumerable<MessageDto>> GetMessageThreadAsync(int currentUserId, int recipientId);
+        Task<IEnumerable<MessageDto>> GetMessageThreadAsync(string currentUsername, string recipientUsername);
         Task<bool> SaveAllAsync();
     }
 }

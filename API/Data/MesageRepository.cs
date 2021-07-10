@@ -63,9 +63,33 @@ namespace API.Data
                 .ConfigureAwait(false);
         }
 
-        public Task<IEnumerable<MessageDto>> GetMessageThreadAsync(int currentUserId, int recipientId)
+        public async Task<IEnumerable<MessageDto>> GetMessageThreadAsync(string currentUsername, string recipientUsername)
         {
-            throw new NotImplementedException();
+            var messages = await _context
+                .Messages
+                .Include(x => x.Sender).ThenInclude(x => x.Photos)
+                .Include(x => x.Recipient).ThenInclude(x => x.Photos)
+                .Where(x => (x.Recipient.UserName == currentUsername && x.Sender.UserName == recipientUsername)
+                    || (x.Sender.UserName == currentUsername && x.Recipient.UserName == recipientUsername))
+                .OrderBy(x => x.MessageSent)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var unreadMessages = messages
+                .Where(x => !x.DateRead.HasValue && x.Recipient.UserName == currentUsername)
+                .ToList();
+
+            if(unreadMessages.Any())
+            {
+                foreach(var message in unreadMessages)
+                {
+                    message.DateRead = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return _mapper.Map<IEnumerable<MessageDto>>(messages);
         }
 
         public async Task<bool> SaveAllAsync()
