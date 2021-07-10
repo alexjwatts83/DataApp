@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extentions;
+using API.Helpers;
 using API.Interface;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -33,28 +34,29 @@ namespace API.Data
                 .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<LikeDto>> GetUserLikes(string predicate, int userId)
+        public async Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams)
         {
             _logger.LogInformation($"****************************************");
-            _logger.LogInformation($"********************predicate:{predicate}, userId:{userId}********************");
+            _logger.LogInformation($"********************predicate:{likesParams.Predicate}, userId:{likesParams.UserId}********************");
             _logger.LogInformation($"****************************************");
 
             var users = _context.Users.OrderBy(x => x.UserName).AsQueryable();
             var likes = _context.Likes.AsQueryable();
-            if(predicate == "liked")
+            if(likesParams.Predicate == "liked")
             {
-                likes = likes.Where(like => like.SourceUserId == userId);
+                likes = likes.Where(like => like.SourceUserId == likesParams.UserId);
                 users = likes.Select(like => like.LikedUser);
             }
-            if (predicate == "likedBy")
+            if (likesParams.Predicate == "likedBy")
             {
-                likes = likes.Where(like => like.LikedUserId == userId);
+                likes = likes.Where(like => like.LikedUserId == likesParams.UserId);
                 users = likes.Select(like => like.SourceUser);
             }
 
-            return await users
-                .ProjectTo<LikeDto>(_mapper.ConfigurationProvider)
-                .ToListAsync()
+            var likedUsers = users.ProjectTo<LikeDto>(_mapper.ConfigurationProvider);
+
+            return await PagedList<LikeDto>
+                .CreateAsync(likedUsers, likesParams.PageNumber, likesParams.PageSize)
                 .ConfigureAwait(false);
         }
 
