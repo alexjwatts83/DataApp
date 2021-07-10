@@ -31,6 +31,14 @@ export class TestErrorsComponent implements OnInit {
     })
   }
 
+  get400NoTextError() {
+    this.http.get(`${this.baseUrl}/bad-request-no-text`).subscribe(response => {
+      console.log(response);
+    }, error=> {
+      console.log(error);
+    })
+  }
+
   get500Error() {
     this.http.get(`${this.baseUrl}/server-error`).subscribe(response => {
       console.log(response);

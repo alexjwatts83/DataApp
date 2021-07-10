@@ -13,7 +13,8 @@ import { AccountService } from './account.service';
   providedIn: 'root',
 })
 export class MembersService {
-  private baseUrl = `${environment.apiUrl}/users`;
+  private userUrl = `${environment.apiUrl}/users`;
+  private likesUrl = `${environment.apiUrl}/likes`;
 
   members: Member[] = [];
   memberCache = new Map();
@@ -27,8 +28,12 @@ export class MembersService {
     });
   }
 
-  private getUrl(path: string): string {
-    return `${this.baseUrl}/${path}`;
+  private getUserUrl(path: string): string {
+    return `${this.userUrl}/${path}`;
+  }
+
+  private getLikesUrl(path: string): string {
+    return `${this.likesUrl}/${path}`;
   }
 
   private getPaginationHeaders(pageNumber: number, pageSize: number) {
@@ -89,7 +94,7 @@ export class MembersService {
     params = params.append('gender', userParams.gender);
     params = params.append('orderBy', userParams.orderBy);
 
-    return this.getPaginatedResults<Member[]>(this.baseUrl, params).pipe(
+    return this.getPaginatedResults<Member[]>(this.userUrl, params).pipe(
       map((response) => {
         this.memberCache.set(this.convertToKey(userParams), response);
         return response;
@@ -109,11 +114,11 @@ export class MembersService {
       return of(member);
     }
     
-    return this.http.get<Member>(this.getUrl(username));
+    return this.http.get<Member>(this.getUserUrl(username));
   }
 
   updateMember(member: Member) {
-    return this.http.put(this.baseUrl, member).pipe(
+    return this.http.put(this.userUrl, member).pipe(
       map(() => {
         const index = this.members.indexOf(member);
         this.members[index] = member;
@@ -122,10 +127,18 @@ export class MembersService {
   }
 
   setMainPhoto(photoId: number) {
-    return this.http.put(this.getUrl(`set-main-photo/${photoId}`), {});
+    return this.http.put(this.getUserUrl(`set-main-photo/${photoId}`), {});
   }
 
   deletePhoto(photoId: number) {
-    return this.http.delete(this.getUrl(`delete-photo/${photoId}`));
+    return this.http.delete(this.getUserUrl(`delete-photo/${photoId}`));
+  }
+
+  addLike(username: string) {
+    return this.http.post(this.getLikesUrl(username), {});
+  }
+
+  getLikes(predicate: string) {
+    return this.http.get(`${this.likesUrl}?predicate=${predicate}`);
   }
 }
