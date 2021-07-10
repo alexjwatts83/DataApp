@@ -42,9 +42,25 @@ namespace API.Data
             return await _context.Messages.FindAsync(id).ConfigureAwait(false);
         }
 
-        public Task<PagedList<MessageDto>> GetMessagesForUserAsync()
+        public async Task<PagedList<MessageDto>> GetMessagesForUserAsync(MessageParams messageParams)
         {
-            throw new NotImplementedException();
+            var query = _context
+                .Messages
+                .OrderByDescending(m => m.MessageSent)
+                .AsQueryable();
+
+            query = messageParams.Container.ToLower() switch
+            {
+                "inbox" => query.Where(u => u.Recipient.UserName == messageParams.Username),
+                "outbox" => query.Where(u => u.Sender.UserName == messageParams.Username),
+                _ => query.Where(u => u.Recipient.UserName == messageParams.Username && !u.DateRead.HasValue)
+            };
+
+            var messages = query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
+
+            return await PagedList<MessageDto>
+                .CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize)
+                .ConfigureAwait(false);
         }
 
         public Task<IEnumerable<MessageDto>> GetMessageThreadAsync(int currentUserId, int recipientId)
