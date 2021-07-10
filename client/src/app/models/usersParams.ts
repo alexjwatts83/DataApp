@@ -12,3 +12,4 @@ export class UserParams {
     this.gender =  user.gender === 'female' ? 'male' : 'female';
   }
 }
+

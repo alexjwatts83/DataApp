@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Member } from '../models/member';
+import { Pagination } from '../models/pagination';
+import { LikesParams } from "../models/LikesParams";
 import { MembersService } from '../_services/members.service';
 
 @Component({
@@ -9,24 +11,32 @@ import { MembersService } from '../_services/members.service';
 })
 export class ListsComponent implements OnInit {
   members!: Partial<Member[]> | undefined;
-  predicate = 'liked';
+  likeParms = new LikesParams();
+  pagination: Pagination | undefined;
 
-  constructor(private memberService: MembersService) { }
+  constructor(private memberService: MembersService) { 
+  }
 
   ngOnInit(): void {
     this.loadLikes();
   }
 
   getTitle(): string {
-    return this.predicate === 'liked'
+    return this.likeParms.predicate === 'liked'
     ? 'Members I like'
     : 'Members who like me';
   }
 
   loadLikes() {
-    this.memberService.getLikes(this.predicate).subscribe(response => {
-      this.members = response;
+    this.memberService.getLikes(this.likeParms).subscribe(response => {
+      this.members = response.result;
+      this.pagination = response.pagination || undefined;
       console.log(this.members);
     });
+  }
+
+  pageChanged(event: any) {
+    this.likeParms.pageNumber = event.page;
+    this.loadLikes();
   }
 }
