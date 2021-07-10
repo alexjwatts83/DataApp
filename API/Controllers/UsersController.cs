@@ -92,7 +92,7 @@ namespace API.Controllers
                 return BadRequest($"Photo with id of '{photoId}' is already the main photo");
             }
 
-            var photoMain = user.Photos.FirstOrDefault(x => x.IsMain);
+            var photoMain = user.GetMainPhoto();
 
             if (photo != null)
             {

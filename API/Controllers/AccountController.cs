@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extentions;
 using API.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Cors;
@@ -81,15 +82,11 @@ namespace API.Controllers
                 }
             }
 
-            var photos = user.Photos;
-            var mainPhoto = photos?.FirstOrDefault(x => x.IsMain);
-            var photoUrl = mainPhoto == null ? string.Empty : mainPhoto.Url;
-
             return new UserDto
             {
                 Username = user.UserName,
                 Token = _tokenService.CreateToken(user),
-                PhotoUrl = photos?.FirstOrDefault(x => x.IsMain)?.Url,
+                PhotoUrl = user.GetMainPhotoUrl(),
                 KnownAs = user.KnownAs,
                 Gender = user.Gender
             };
