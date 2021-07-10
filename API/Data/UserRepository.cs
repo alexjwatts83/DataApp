@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
-
     public class UserRepository : IUserRepository
     {
         private readonly DataContext _context;
