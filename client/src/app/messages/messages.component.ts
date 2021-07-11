@@ -12,7 +12,7 @@ export class MessagesComponent implements OnInit {
   messages!: Message[] | undefined;
   pagination: Pagination | undefined;
   container = 'unread';
-  pageSize = 1;
+  pageSize = 5;
   pageNumber = 1;
 
   constructor(private messageService: MessageService) {}

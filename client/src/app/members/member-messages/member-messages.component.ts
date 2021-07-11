@@ -14,7 +14,7 @@ export class MemberMessagesComponent implements OnInit {
   @Input() messages: Message[] = [];
   @Output() sendClick = new EventEmitter<CreateMessage>();
   
-  content = 'Ut lacinia convallis magna nec laoreet';
+  content = '';
 
   constructor() { }
 
