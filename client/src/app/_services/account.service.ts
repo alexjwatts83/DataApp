@@ -34,7 +34,15 @@ export class AccountService {
   }
 
   setCurrentUser(user: User): void {
-    // console.log(user);
+    user.roles = [];
+    const roles = this.getDecodedToken(user.token).role;
+    const isArray =  Array.isArray(roles);
+    if(isArray) {
+      user.roles = roles;
+    } else {
+      user.roles.push(roles);
+    }
+    console.log({roles: roles, user: user, isArray: isArray});
     // console.log(Object.entries(user));
     let isLogged = Object.entries(user).length > 0;
     // console.log({isLogged: isLogged});
@@ -61,5 +69,9 @@ export class AccountService {
         return user;
       })
     );
+  }
+
+  getDecodedToken(token: string) {
+    return JSON.parse(atob(token.split('.')[1]));
   }
 }
