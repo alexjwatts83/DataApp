@@ -9,6 +9,7 @@ using API.Extentions;
 using API.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,33 +18,43 @@ namespace API.Controllers
 {
     public class AccountController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly ILogger<AccountController> _logger;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public AccountController(DataContext context, ILogger<AccountController> logger, ITokenService tokenService, IMapper mapper)
+        public AccountController(
+            ILogger<AccountController> logger,
+            ITokenService tokenService,
+            IMapper mapper,
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager)
         {
-            _context = context;
             _logger = logger;
             _tokenService = tokenService;
             _mapper = mapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpPost("register")]
         [EnableCors("AllowOrigin")]
         public async Task<ActionResult<UserDto>> Register(RegisterUserDto registerUserDto)
         {
-            if (await UserExists(registerUserDto.Username).ConfigureAwait(false))
+            if (await UserExistsAsync(registerUserDto.Username).ConfigureAwait(false))
                 return BadRequest("Username exists");
 
             var user = _mapper.Map<AppUser>(registerUserDto);
 
             user.UserName = registerUserDto.Username.ToLower();
 
-            _context.Users.Add(user);
+            var result = await _userManager.CreateAsync(user, registerUserDto.Password);
 
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            if(!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
 
             return new UserDto {
                 Username = user.UserName,
@@ -57,13 +68,23 @@ namespace API.Controllers
         [EnableCors("AllowOrigin")]
         public async Task<ActionResult<UserDto>> Login(LoginUserDto loginUserDto)
         {
-            var user = await _context.Users
+            var user = await _userManager.Users
                 .Include(x => x.Photos)
-                .SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower());
+                .SingleOrDefaultAsync(x => x.UserName == loginUserDto.Username.ToLower())
+                .ConfigureAwait(false);
 
             if (user == null)
             {
                 return Unauthorized("Invalid username");
+            }
+
+            var result = await _signInManager
+                .CheckPasswordSignInAsync(user, loginUserDto.Password, false)
+                .ConfigureAwait(false);
+
+            if (!result.Succeeded)
+            {
+                return Unauthorized();
             }
 
             return new UserDto
@@ -76,9 +97,12 @@ namespace API.Controllers
             };
         }
 
-        private async Task<bool> UserExists(string username)
+        private async Task<bool> UserExistsAsync(string username)
         {
-            return await _context.Users.AnyAsync(x => x.UserName == username.ToLower()).ConfigureAwait(false);
+            return await _userManager
+                .Users
+                .AnyAsync(x => x.UserName == username.ToLower())
+                .ConfigureAwait(false);
         }
     }
 }
