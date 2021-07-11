@@ -29,7 +29,21 @@ namespace API.Extentions
 
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => { options.TokenValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenKey"])), ValidateIssuer = false, ValidateAudience = false }; });
+                .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenKey"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                });
+
+            services
+                .AddAuthorization(options =>
+                {
+                    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                    options.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
+                });
+
             return services;
         }
     }
