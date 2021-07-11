@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,12 +26,13 @@ namespace API
             {
                 logger.LogDebug("Getting DataContext from Services");
                 var context = services.GetRequiredService<DataContext>();
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
                 logger.LogDebug("About to run migrate");
                 await context.Database.MigrateAsync().ConfigureAwait(false);
 
                 logger.LogDebug("About to seed users");
-                //await Seed.SeedUsers(context);
+                await Seed.SeedUsersAsync(userManager).ConfigureAwait(false);
 
                 logger.LogDebug("Seed Users successfully");
             }
