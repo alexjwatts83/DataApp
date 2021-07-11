@@ -12,7 +12,7 @@ export class MessageService {
   private baseUrl = `${environment.apiUrl}/messages`;
   constructor(private http: HttpClient) { }
 
-  private getUrl(path: string): string {
+  private getUrl(path: string | number): string {
     return `${this.baseUrl}/${path}`;
   }
 
@@ -29,5 +29,9 @@ export class MessageService {
 
   sendMessage(messageParams: CreateMessage) {
     return this.http.post<Message>(this.baseUrl, messageParams);
+  }
+
+  deleteMessage(id: number) {
+    return this.http.delete(this.getUrl(id));
   }
 }

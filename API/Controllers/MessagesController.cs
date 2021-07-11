@@ -96,7 +96,7 @@ namespace API.Controllers
             return Ok(messages);
         }
 
-        [HttpDelete("{id")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMessage(int id)
         {
             var username = User.GetUsername();

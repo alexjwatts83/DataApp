@@ -39,7 +39,12 @@ namespace API.Data
 
         public async Task<Message> GetMessageAsync(int id)
         {
-            return await _context.Messages.FindAsync(id).ConfigureAwait(false);
+            return await _context
+                .Messages
+                .Include(x => x.Recipient)
+                .Include(x => x.Sender)
+                .SingleOrDefaultAsync(x => x.Id == id)
+                .ConfigureAwait(false);
         }
 
         public async Task<PagedList<MessageDto>> GetMessagesForUserAsync(MessageParams messageParams)
