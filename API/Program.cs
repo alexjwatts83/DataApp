@@ -27,12 +27,13 @@ namespace API
                 logger.LogDebug("Getting DataContext from Services");
                 var context = services.GetRequiredService<DataContext>();
                 var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
                 logger.LogDebug("About to run migrate");
                 await context.Database.MigrateAsync().ConfigureAwait(false);
 
                 logger.LogDebug("About to seed users");
-                await Seed.SeedUsersAsync(userManager).ConfigureAwait(false);
+                await Seed.SeedUserDataAsync(userManager, roleManager).ConfigureAwait(false);
 
                 logger.LogDebug("Seed Users successfully");
             }
