@@ -31,8 +31,11 @@ export class MemberDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.route.data.subscribe(data => {
+      this.member = data.member;
+    })
+
     this.route.queryParams.subscribe(params => {
-      console.log({queryParams: params});
       params.tab ? this.selectTab(params.tab) : this.selectTab(0);
     });
 
@@ -46,7 +49,8 @@ export class MemberDetailsComponent implements OnInit {
         preview: false,
       },
     ];
-    this.loadMember();
+    
+    this.galleryImages = this.getGalleryImages();
   }
 
   getGalleryImages(): NgxGalleryImage[] {
@@ -61,17 +65,17 @@ export class MemberDetailsComponent implements OnInit {
     return galleryOptions;
   }
 
-  loadMember() {
-    let username = this.route.snapshot.paramMap.get('username');
-    if (username) {
-      this.memberService.getMember(username).subscribe((member: Member) => {
-        this.member = member;
-        this.galleryImages = this.getGalleryImages();
-      });
-    } else {
-      console.log('user not found');
-    }
-  }
+  // loadMember() {
+  //   let username = this.route.snapshot.paramMap.get('username');
+  //   if (username) {
+  //     this.memberService.getMember(username).subscribe((member: Member) => {
+  //       this.member = member;
+  //       this.galleryImages = this.getGalleryImages();
+  //     });
+  //   } else {
+  //     console.log('user not found');
+  //   }
+  // }
 
   loadMessages() {
     this.messageService.getMessageThread(this.member.username).subscribe((messages: Message[]) => {

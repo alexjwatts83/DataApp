@@ -11,6 +11,7 @@ import { MembersListComponent } from './members/members-list/members-list.compon
 import { MessagesComponent } from './messages/messages.component';
 import { AuthGuard } from './_guard/auth.guard';
 import { PreventUnsavedChangesGuard } from './_guard/prevent-unsaved-changes.guard';
+import { MemberDetailsResolver } from './_resolvers/member-details.resolver';
 
 const routes: Routes = [
   {
@@ -25,7 +26,7 @@ const routes: Routes = [
         path: 'members', component: MembersListComponent 
       },
       {
-        path: 'members/:username', component: MemberDetailsComponent
+        path: 'members/:username', component: MemberDetailsComponent, resolve: {member: MemberDetailsResolver}
       },
       {
         path: 'member/edit/:username', component: MemberEditComponent, canDeactivate: [PreventUnsavedChangesGuard]
