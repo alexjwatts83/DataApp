@@ -34,13 +34,10 @@ export class AccountService {
   }
 
   setCurrentUser(user: User): void {
-    console.log(user);
-    console.log(Object.entries(user));
-    if(user.constructor  === Object) {
-      console.log('user is undefined');
-    }
+    // console.log(user);
+    // console.log(Object.entries(user));
     let isLogged = Object.entries(user).length > 0;
-    console.log({isLogged: isLogged});
+    // console.log({isLogged: isLogged});
     this.isLoggedIn$.next(isLogged);
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
@@ -53,11 +50,11 @@ export class AccountService {
   }
 
   register(model: any) {
-    console.log('calling register with model', model);
+    // console.log('calling register with model', model);
     return this.http.post<User>(this.getUrl('register'), model)
     .pipe(
       map((user: User) => {
-        console.log('api call successful', user);
+        // console.log('api call successful', user);
         if(user) {
           this.setCurrentUser(user);
         }

@@ -22,7 +22,7 @@ export class JwtInterceptor implements HttpInterceptor {
     this.acountService.currentUser$
       .pipe(take(1))
       .subscribe((user: User) => {
-        console.log('intercept user=>', user);
+        // console.log('intercept user=>', user);
         currentUser = user;
       });
 

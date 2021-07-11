@@ -31,7 +31,6 @@ export class ListsComponent implements OnInit {
     this.memberService.getLikes(this.likeParms).subscribe(response => {
       this.members = response.result;
       this.pagination = response.pagination || undefined;
-      console.log(this.members);
     });
   }
 
