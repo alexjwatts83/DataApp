@@ -1,12 +1,27 @@
 <div class="row mb-4">
   <div class="btn-group" name="container">
-    <button class="btn btn-primary" btnRadio="unread" [(ngModel)]="container" (click)="loadMessages()">
+    <button
+      class="btn btn-primary"
+      btnRadio="unread"
+      [(ngModel)]="container"
+      (click)="loadMessages()"
+    >
       <i class="fa fa-envelope"></i> Unread
     </button>
-    <button class="btn btn-primary" btnRadio="inbox" [(ngModel)]="container" (click)="loadMessages()">
+    <button
+      class="btn btn-primary"
+      btnRadio="inbox"
+      [(ngModel)]="container"
+      (click)="loadMessages()"
+    >
       <i class="fa fa-envelope-open"></i> Inbox
     </button>
-    <button class="btn btn-primary" btnRadio="outbox" [(ngModel)]="container" (click)="loadMessages()">
+    <button
+      class="btn btn-primary"
+      btnRadio="outbox"
+      [(ngModel)]="container"
+      (click)="loadMessages()"
+    >
       <i class="fa fa-paper-plane"></i> Outbox
     </button>
   </div>
@@ -17,42 +32,52 @@
 </div>
 
 <div class="row" *ngIf="$any(messages).length > 0">
-  <table class="table table-hover" style="cursor: pointer;">
+  <table class="table table-hover" style="cursor: pointer">
     <thead>
       <tr>
-        <th style="width: 40%;">Message</th>
-        <th style="width: 20%;">From / To</th>
-        <th style="width: 20%;">Sent / Received</th>
-        <th style="width: 20%;"></th>
+        <th style="width: 40%">Message</th>
+        <th style="width: 20%">From / To</th>
+        <th style="width: 20%">Sent / Received</th>
+        <th style="width: 20%"></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let message of messages" 
-      routerLink='{{container === "outbox" 
-        ? "/members/" + message.recipientUsername 
-        : "/members/" + message.senderUsername }}' style="cursor: pointer;">
-      <td>{{message.content}}</td>
-      <td>
-        <div *ngIf="container === 'outbox'">
-          <img src="{{message.recipientPhotoUrl || './assets/user.png'}}" 
-                alt="{{message.recipientUsername}}"
-                class="img-circle rounded-circle mr-2" />
-            <strong>{{ message.recipientUsername | titlecase}}</strong>
-        </div>
-        <div *ngIf="container !== 'outbox'">
-          <img src="{{message.senderPhotoUrl || './assets/user.png'}}" 
-                alt="{{message.senderUsername}}"
-                class="img-circle rounded-circle mr-2" />
-          <strong>{{ message.senderUsername | titlecase}}</strong>
-        </div>
-      </td>
-      <td>
-        {{ message.messageSent | timeago }}
-      </td>
-      <td>
-        <button class="btn btn-danger"><i class="fa fa-trash"></i></button>
-      </td>
-  </tr>
+      <tr
+        *ngFor="let message of messages"
+        routerLink="{{
+          container === 'outbox'
+            ? '/members/' + message.recipientUsername
+            : '/members/' + message.senderUsername
+        }}"
+        style="cursor: pointer"
+        [queryParams]="{ tab: 3 }"
+      >
+        <td>{{ message.content }}</td>
+        <td>
+          <div *ngIf="container === 'outbox'">
+            <img
+              src="{{ message.recipientPhotoUrl || './assets/user.png' }}"
+              alt="{{ message.recipientUsername }}"
+              class="img-circle rounded-circle mr-2"
+            />
+            <strong>{{ message.recipientUsername | titlecase }}</strong>
+          </div>
+          <div *ngIf="container !== 'outbox'">
+            <img
+              src="{{ message.senderPhotoUrl || './assets/user.png' }}"
+              alt="{{ message.senderUsername }}"
+              class="img-circle rounded-circle mr-2"
+            />
+            <strong>{{ message.senderUsername | titlecase }}</strong>
+          </div>
+        </td>
+        <td>
+          {{ message.messageSent | timeago }}
+        </td>
+        <td>
+          <button class="btn btn-danger"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>
     </tbody>
   </table>
 </div>
