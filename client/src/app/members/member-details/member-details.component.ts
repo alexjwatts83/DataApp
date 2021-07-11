@@ -4,6 +4,7 @@ import { NgxGalleryOptions } from '@kolkov/ngx-gallery';
 import { NgxGalleryImage } from '@kolkov/ngx-gallery';
 import { NgxGalleryAnimation } from '@kolkov/ngx-gallery';
 import { TabDirective, TabsetComponent } from 'ngx-bootstrap/tabs';
+import { CreateMessage } from 'src/app/models/createMessage';
 import { Member } from 'src/app/models/member';
 import { Message } from 'src/app/models/message';
 import { MembersService } from 'src/app/_services/members.service';
@@ -65,18 +66,6 @@ export class MemberDetailsComponent implements OnInit {
     return galleryOptions;
   }
 
-  // loadMember() {
-  //   let username = this.route.snapshot.paramMap.get('username');
-  //   if (username) {
-  //     this.memberService.getMember(username).subscribe((member: Member) => {
-  //       this.member = member;
-  //       this.galleryImages = this.getGalleryImages();
-  //     });
-  //   } else {
-  //     console.log('user not found');
-  //   }
-  // }
-
   loadMessages() {
     this.messageService.getMessageThread(this.member.username).subscribe((messages: Message[]) => {
       this.messages = messages;
@@ -95,5 +84,11 @@ export class MemberDetailsComponent implements OnInit {
     if (this.activeTab.heading === 'Messages' && this.messages.length === 0) {
       this.loadMessages();
     }
+  }
+
+  sendMessage(event: CreateMessage) {
+    this.messageService.sendMessage(event).subscribe((response: Message) => {
+      this.messages.push(response);
+    })
   }
 }
