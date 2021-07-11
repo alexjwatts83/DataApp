@@ -26,10 +26,10 @@ namespace API
                 var context = services.GetRequiredService<DataContext>();
 
                 logger.LogDebug("About to run migrate");
-                await context.Database.MigrateAsync();
+                await context.Database.MigrateAsync().ConfigureAwait(false);
 
                 logger.LogDebug("About to seed users");
-                await Seed.SeedUsers(context);
+                //await Seed.SeedUsers(context);
 
                 logger.LogDebug("Seed Users successfully");
             }
