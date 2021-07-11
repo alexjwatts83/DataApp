@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Extentions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
+    [Authorize]
+    [EnableCors("AllowOrigin")]
     public class PresenceHub : Hub
     {
         public override async Task OnConnectedAsync()
