@@ -20,24 +20,25 @@ namespace API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILogger<MessagesController> _logger;
-        private readonly IMessageRepository _mesageRepository;
+        private readonly IMessageRepository _messageRepository;
         private readonly IUserRepository _userRepository;
 
         public MessagesController(
             IMapper mapper,
             ILogger<MessagesController> logger,
-            IMessageRepository mesageRepository,
+            IMessageRepository messageRepository,
             IUserRepository userRepository)
         {
             _mapper = mapper;
             _logger = logger;
-            _mesageRepository = mesageRepository;
+            _messageRepository = messageRepository;
             _userRepository = userRepository;
         }
 
         [HttpPost]
         public async Task<ActionResult<MessageDto>> CreateMessage(CreateMessageDto createMessageDto)
         {
+            // TODO: figure out a way to make this generic so messagehub and messagecontroller both use the same function
             var username = User.GetUsername();
             
             if(username == createMessageDto.RecipientUsername.ToLower())
@@ -62,9 +63,9 @@ namespace API.Controllers
                 Content = createMessageDto.Content
             };
 
-            _mesageRepository.AddMessage(message);
+            _messageRepository.AddMessage(message);
 
-            if (await _mesageRepository.SaveAllAsync().ConfigureAwait(false)) return Ok(_mapper.Map<MessageDto>(message));
+            if (await _messageRepository.SaveAllAsync().ConfigureAwait(false)) return Ok(_mapper.Map<MessageDto>(message));
 
             return BadRequest("Failed to send message");
         }
@@ -74,7 +75,7 @@ namespace API.Controllers
         {
             messageParams.Username = User.GetUsername();
 
-            var messages = await _mesageRepository.GetMessagesForUserAsync(messageParams).ConfigureAwait(false);
+            var messages = await _messageRepository.GetMessagesForUserAsync(messageParams).ConfigureAwait(false);
 
             Response.AddPaginationHeader(
                 messages.CurrentPage,
@@ -89,7 +90,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThreadAsync(string username)
         {
             var currentUsername = User.GetUsername();
-            var messages = await _mesageRepository
+            var messages = await _messageRepository
                 .GetMessageThreadAsync(currentUsername, username)
                 .ConfigureAwait(false);
 
@@ -100,7 +101,7 @@ namespace API.Controllers
         public async Task<ActionResult> DeleteMessage(int id)
         {
             var username = User.GetUsername();
-            var message = await _mesageRepository.GetMessageAsync(id).ConfigureAwait(false);
+            var message = await _messageRepository.GetMessageAsync(id).ConfigureAwait(false);
             
             if(message == null)
             {
@@ -124,10 +125,10 @@ namespace API.Controllers
 
             if(message.SenderDeleted && message.RecipientDeleted)
             {
-                _mesageRepository.DeleteMessage(message);
+                _messageRepository.DeleteMessage(message);
             }
 
-            if (await _mesageRepository.SaveAllAsync().ConfigureAwait(false))
+            if (await _messageRepository.SaveAllAsync().ConfigureAwait(false))
             {
                 return Ok();
             }
