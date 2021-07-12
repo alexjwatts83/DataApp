@@ -20,13 +20,13 @@ namespace API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILogger<MessagesController> _logger;
-        private readonly IMesageRepository _mesageRepository;
+        private readonly IMessageRepository _mesageRepository;
         private readonly IUserRepository _userRepository;
 
         public MessagesController(
             IMapper mapper,
             ILogger<MessagesController> logger,
-            IMesageRepository mesageRepository,
+            IMessageRepository mesageRepository,
             IUserRepository userRepository)
         {
             _mapper = mapper;

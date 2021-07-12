@@ -13,15 +13,15 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
-    public class MesageRepository : IMesageRepository
+    public class MessageRepository : IMessageRepository
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<MesageRepository> _logger;
+        private readonly ILogger<MessageRepository> _logger;
 
-        public MesageRepository(DataContext context,
+        public MessageRepository(DataContext context,
                                 IMapper mapper,
-                                ILogger<MesageRepository> logger)
+                                ILogger<MessageRepository> logger)
         {
             _context = context;
             _mapper = mapper;

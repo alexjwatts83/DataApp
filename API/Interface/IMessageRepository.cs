@@ -6,7 +6,7 @@ using API.Helpers;
 
 namespace API.Interface
 {
-    public interface IMesageRepository
+    public interface IMessageRepository
     {
         void AddMessage(Message message);
         void DeleteMessage(Message message);
