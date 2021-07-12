@@ -78,15 +78,15 @@ namespace API
 
             app.UseRouting();
 
-            //app.UseCors(options =>
-            //{
-            //    options.AllowAnyHeader()
-            //           .AllowAnyMethod()
-            //           .WithOrigins("https://localhost:4200")
-            //           .AllowCredentials();
-            //});
+            app.UseCors(options =>
+            {
+                options.AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .WithOrigins("https://localhost:4200")
+                       .AllowCredentials();
+            });
 
-            app.UseCors();
+            //app.UseCors();
 
             app.UseAuthentication();
 

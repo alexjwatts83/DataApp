@@ -19,7 +19,7 @@ export class PresenceService {
 
     const options = {
       accessTokenFactory: () => user.token,
-      skipNegotiation: true,
+      // skipNegotiation: true,
       transport: signalR.HttpTransportType.WebSockets,
     };
     this.hubConnection = new HubConnectionBuilder()
