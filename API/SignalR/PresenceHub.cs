@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.SignalR;
 namespace API.SignalR
 {
     [Authorize]
-    [EnableCors("AllowOrigin")]
     public class PresenceHub : Hub
     {
         public override async Task OnConnectedAsync()

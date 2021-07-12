@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as signalR from '@microsoft/signalr';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
@@ -14,14 +15,28 @@ export class PresenceService {
   constructor(private toastr: ToastrService) {}
 
   createHubConnection(user: User) {
+    console.log('connecting to hub', user);
+
+    const options = {
+      accessTokenFactory: () => user.token,
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets,
+    };
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(this.baseUrl, {
-        accessTokenFactory: () => user.token,
-      })
+      .withUrl(this.baseUrl, options)
+      .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch((error) => console.error(error));
+    console.log({ hubConn: this.hubConnection });
+
+    this.hubConnection
+      .start()
+      .then(() => console.log('Connected to hubs/presence'))
+      .catch((error) => {
+        this.toastr.error('Failed to connect to SignalR');
+        console.log(error);
+      });
 
     this.hubConnection.on('UserIsOnline', (username) => {
       this.toastr.info(username + ' has connected');

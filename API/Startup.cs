@@ -38,16 +38,27 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            
-            services.AddCors(c => {
+            //services.AddCors();
+
+            services.AddCors(c =>
+            {
                 c.AddPolicy("AllowOrigin", options => options
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
+                    .AllowAnyHeader());
             });
 
+            //services.AddCors(o => o.AddPolicy("AllowOrigin", builder => {
+            //    builder
+            //    .AllowAnyMethod()
+            //    .AllowAnyHeader()
+            //    .AllowCredentials()
+            //    .AllowAnyOrigin();
+            //    //.WithOrigins("http://localhost:4200");
+            //}));
+
             services.AddIdentityServices(_configuration);
+
             services.AddSignalR();
         }
 
@@ -67,13 +78,15 @@ namespace API
 
             app.UseRouting();
 
-            app.UseCors(options =>
-            {
-                //options
-                //.AllowAnyHeader()
-                //.AllowAnyMethod()
-                //.WithOrigins("https://localhost:44304");
-            });
+            //app.UseCors(options =>
+            //{
+            //    options.AllowAnyHeader()
+            //           .AllowAnyMethod()
+            //           .WithOrigins("https://localhost:4200")
+            //           .AllowCredentials();
+            //});
+
+            app.UseCors();
 
             app.UseAuthentication();
 
@@ -84,6 +97,11 @@ namespace API
                 endpoints.MapControllers();
                 endpoints.MapHub<PresenceHub>("hubs/presence");
             });
+
+            //app.UseSignalR(routes =>
+            //{
+            //    routes.MapHub<ChatHub>("/chatHub");
+            //});
         }
     }
 }

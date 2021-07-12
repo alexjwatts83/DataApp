@@ -4,6 +4,7 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from '../models/user';
+import { PresenceService } from './presence.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AccountService {
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   currentUser$ = this.currentUserSource.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private presenceService: PresenceService) { }
 
   private getUrl(path: string): string {
     return `${this.baseUrl}/${path}`;
@@ -28,6 +29,7 @@ export class AccountService {
       map((user: User) => {
         if(user) {
           this.setCurrentUser(user);
+          this.presenceService.createHubConnection(user);
         }
       })
     );
@@ -55,6 +57,7 @@ export class AccountService {
     localStorage.removeItem('user');
     this.currentUserSource.next(undefined);
     this.isLoggedIn$.next(false);
+    this.presenceService.stopHubConnection();
   }
 
   register(model: any) {
@@ -65,6 +68,7 @@ export class AccountService {
         // console.log('api call successful', user);
         if(user) {
           this.setCurrentUser(user);
+          this.presenceService.createHubConnection(user);
         }
         return user;
       })
