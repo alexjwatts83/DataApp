@@ -10,7 +10,7 @@ import { User } from '../models/user';
   providedIn: 'root',
 })
 export class PresenceService {
-  private baseUrl = `${environment.hubUrl}/presence`;
+  private hubUrl = `${environment.hubUrl}/presence`;
   private hubConnection!: HubConnection;
   private onlineUsersSource = new BehaviorSubject<string[]>([]);
   onlineUsers$ = this.onlineUsersSource.asObservable();
@@ -18,7 +18,7 @@ export class PresenceService {
   constructor(private toastr: ToastrService) {}
 
   createHubConnection(user: User) {
-    console.log('connecting to hub', user);
+    console.log('connecting to presence hub', user);
 
     const options = {
       accessTokenFactory: () => user.token,
@@ -26,7 +26,7 @@ export class PresenceService {
       transport: signalR.HttpTransportType.WebSockets,
     };
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(this.baseUrl, options)
+      .withUrl(this.hubUrl, options)
       .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();
