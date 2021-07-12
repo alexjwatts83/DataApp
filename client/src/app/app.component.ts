@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from './models/user';
 import { AccountService } from './_services/account.service';
+import { PresenceService } from './_services/presence.service';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ import { AccountService } from './_services/account.service';
 })
 export class AppComponent implements OnInit {
   title = 'Almighty Push';
-  constructor(private accountService: AccountService) {
+  constructor(private accountService: AccountService, private presence: PresenceService) {
   }
 
   ngOnInit(): void {
@@ -19,7 +20,14 @@ export class AppComponent implements OnInit {
   }
 
   setCurrentUser() {
-    let user: User = JSON.parse(localStorage.getItem('user') || '{}');
-    this.accountService.setCurrentUser(user);
+    let userJson = localStorage.getItem('user');
+    if(userJson) {
+      let user: User = JSON.parse(userJson);
+      // should not need to do this check but will anyway.
+      if(user){
+        this.accountService.setCurrentUser(user);
+        this.presence.createHubConnection(user);
+      }
+    }
   }
 }
