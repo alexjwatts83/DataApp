@@ -17,17 +17,23 @@ namespace API.SignalR
         private readonly IMapper _mapper;
         private readonly ILogger<MessageHub> _logger;
         private readonly IUserRepository _userRepository;
+        private readonly IHubContext<PresenceHub> _presenceHub;
+        private readonly PresenceTracker _presenceTracker;
 
         public MessageHub(
             IMessageRepository messageRepository,
             IMapper mapper,
             ILogger<MessageHub> logger,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IHubContext<PresenceHub> presenceHub,
+            PresenceTracker presenceTracker)
         {
             _messageRepository = messageRepository;
             _mapper = mapper;
             _logger = logger;
             _userRepository = userRepository;
+            _presenceHub = presenceHub;
+            _presenceTracker = presenceTracker;
         }
 
         public override async Task OnConnectedAsync()
@@ -86,6 +92,22 @@ namespace API.SignalR
             if(group.Connections.Any(x => x.Username == recipient.UserName))
             {
                 message.DateRead = DateTime.UtcNow;
+            }
+            else
+            {
+                _logger.LogInformation($"SendMessage ============== : recipient.UserName'{recipient.UserName}'");
+                var connections = await _presenceTracker.GetConnectionsForUserAsync(recipient.UserName);
+                _logger.LogInformation($"SendMessage ============== : connections.Count'{connections.Count}'");
+                if(connections != null)
+                {
+                    _logger.LogInformation($"SendMessage ============== : {recipient.UserName} is online but not connected to the same group");
+                    await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived", new
+                    {
+                        username = sender.UserName,
+                        knownAs = sender.KnownAs
+                    });
+                    _logger.LogInformation($"SendMessage ============== : Sent message to client");
+                }
             }
 
             _messageRepository.AddMessage(message);
