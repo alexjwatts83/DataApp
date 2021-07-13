@@ -11,7 +11,7 @@ import { User } from '../models/user';
 import { getPaginatedResults, getPaginationHeaders } from './paginationHelper';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageService {
   private baseUrl = `${environment.apiUrl}/messages`;
@@ -21,7 +21,7 @@ export class MessageService {
   private messageThreadSource = new BehaviorSubject<Message[]>([]);
   messageThread$ = this.messageThreadSource.asObservable();
 
-  constructor(private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private http: HttpClient, private toastr: ToastrService) {}
 
   private getUrl(path: string | number): string {
     return `${this.baseUrl}/${path}`;
@@ -35,7 +35,7 @@ export class MessageService {
       transport: signalR.HttpTransportType.WebSockets,
     };
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(this.hubUrl, options)
+      .withUrl(`${this.hubUrl}?user=${otherUsername}`, options)
       .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();
@@ -54,17 +54,12 @@ export class MessageService {
       console.log('RecievedMessageThread', messages);
       this.messageThreadSource.next(messages);
     });
-
-    // this.hubConnection.on('UserIsOffline', (username) => {
-    //   this.toastr.warning(username + ' has disconnected');
-    // });
-
-    // this.hubConnection.on('GetOnlineUsers', (usernames: string[]) => {
-    //   this.onlineUsersSource.next(usernames);
-    // });
   }
 
   stopHubConnection() {
+    if (!this.hubConnection) {
+      return;
+    }
     this.hubConnection.stop().catch((error) => console.error(error));
   }
 

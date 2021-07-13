@@ -5,13 +5,11 @@ using API.Entities;
 using API.Extentions;
 using API.Interface;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.SignalR
 {
-
     public class MessageHub : Hub
     {
         private readonly IMessageRepository _messageRepository;
@@ -35,8 +33,12 @@ namespace API.SignalR
         {
             var httpContext = Context.GetHttpContext();
             var otherUser = httpContext.Request.Query["user"].ToString();
+            _logger.LogInformation($"============== otherUser: '{otherUser}'");
             var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
+            _logger.LogInformation($"============== groupName: '{groupName}'");
+            
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName).ConfigureAwait(false);
+
             var messages = await _messageRepository.GetMessageThreadAsync(Context.User.GetUsername(), otherUser).ConfigureAwait(false);
             await Clients.Group(groupName).SendAsync("RecievedMessageThread", messages).ConfigureAwait(false);
         }
