@@ -4,6 +4,7 @@ import * as signalR from '@microsoft/signalr';
 import { HubConnection } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { CreateMessage } from '../models/createMessage';
 import { Message } from '../models/message';
@@ -11,7 +12,7 @@ import { User } from '../models/user';
 import { getPaginatedResults, getPaginationHeaders } from './paginationHelper';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageService {
   private baseUrl = `${environment.apiUrl}/messages`;
@@ -21,7 +22,7 @@ export class MessageService {
   private messageThreadSource = new BehaviorSubject<Message[]>([]);
   messageThread$ = this.messageThreadSource.asObservable();
 
-  constructor(private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private http: HttpClient, private toastr: ToastrService) {}
 
   private getUrl(path: string | number): string {
     return `${this.baseUrl}/${path}`;
@@ -35,12 +36,12 @@ export class MessageService {
       transport: signalR.HttpTransportType.WebSockets,
     };
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(this.hubUrl, options)
+      .withUrl(`${this.hubUrl}?user=${otherUsername}`, options)
       .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();
 
-    console.log({ hubConn: this.hubConnection });
+    // // console.log({ hubConn: this.hubConnection });
 
     this.hubConnection
       .start()
@@ -55,16 +56,18 @@ export class MessageService {
       this.messageThreadSource.next(messages);
     });
 
-    // this.hubConnection.on('UserIsOffline', (username) => {
-    //   this.toastr.warning(username + ' has disconnected');
-    // });
-
-    // this.hubConnection.on('GetOnlineUsers', (usernames: string[]) => {
-    //   this.onlineUsersSource.next(usernames);
-    // });
+    this.hubConnection.on('NewMessage', (message: Message) => {
+      console.log('NewMessage', message);
+      this.messageThread$.pipe(take(1)).subscribe((messages: Message[]) => {
+        this.messageThreadSource.next([...messages, message]);
+      });
+    });
   }
 
   stopHubConnection() {
+    if (!this.hubConnection) {
+      return;
+    }
     this.hubConnection.stop().catch((error) => console.error(error));
   }
 
@@ -79,11 +82,13 @@ export class MessageService {
     return this.http.get<Message[]>(this.getUrl(`thread/${username}`));
   }
 
-  sendMessage(messageParams: CreateMessage) {
-    return this.http.post<Message>(this.baseUrl, messageParams);
+  async sendMessage(messageParams: CreateMessage) {
+    return this.hubConnection.invoke('SendMessage', messageParams).catch(error => console.log(error));
+    // return this.http.post<Message>(this.baseUrl, messageParams);
   }
 
   deleteMessage(id: number) {
     return this.http.delete(this.getUrl(id));
   }
 }
+  

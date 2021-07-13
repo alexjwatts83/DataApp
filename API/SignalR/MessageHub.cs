@@ -1,48 +1,61 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extentions;
 using API.Interface;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.SignalR
 {
-
     public class MessageHub : Hub
     {
         private readonly IMessageRepository _messageRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<MessageHub> _logger;
         private readonly IUserRepository _userRepository;
+        private readonly IHubContext<PresenceHub> _presenceHub;
+        private readonly PresenceTracker _presenceTracker;
 
         public MessageHub(
             IMessageRepository messageRepository,
             IMapper mapper,
             ILogger<MessageHub> logger,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IHubContext<PresenceHub> presenceHub,
+            PresenceTracker presenceTracker)
         {
             _messageRepository = messageRepository;
             _mapper = mapper;
             _logger = logger;
             _userRepository = userRepository;
+            _presenceHub = presenceHub;
+            _presenceTracker = presenceTracker;
         }
 
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
             var otherUser = httpContext.Request.Query["user"].ToString();
+            //_logger.LogInformation($"============== otherUser: '{otherUser}'");
             var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
+            //_logger.LogInformation($"============== groupName: '{groupName}'");
+
+            await AddToGroup(Context, groupName).ConfigureAwait(false);
+            
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName).ConfigureAwait(false);
+
             var messages = await _messageRepository.GetMessageThreadAsync(Context.User.GetUsername(), otherUser).ConfigureAwait(false);
+
             await Clients.Group(groupName).SendAsync("RecievedMessageThread", messages).ConfigureAwait(false);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
+            await RemoveFromMessageGroup(Context.ConnectionId).ConfigureAwait(false);
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
 
@@ -73,16 +86,60 @@ namespace API.SignalR
                 Content = createMessageDto.Content
             };
 
+            var groupName = GetGroupName(sender.UserName, recipient.UserName);
+            var group = await _messageRepository.GetMessageGroupAsync(groupName).ConfigureAwait(false);
+
+            if(group.Connections.Any(x => x.Username == recipient.UserName))
+            {
+                message.DateRead = DateTime.UtcNow;
+            }
+            else
+            {
+                _logger.LogInformation($"SendMessage ============== : recipient.UserName'{recipient.UserName}'");
+                var connections = await _presenceTracker.GetConnectionsForUserAsync(recipient.UserName);
+                _logger.LogInformation($"SendMessage ============== : connections.Count'{connections.Count}'");
+                if(connections != null)
+                {
+                    _logger.LogInformation($"SendMessage ============== : {recipient.UserName} is online but not connected to the same group");
+                    await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived", new
+                    {
+                        username = sender.UserName,
+                        knownAs = sender.KnownAs
+                    });
+                    _logger.LogInformation($"SendMessage ============== : Sent message to client");
+                }
+            }
+
             _messageRepository.AddMessage(message);
 
             if (await _messageRepository.SaveAllAsync().ConfigureAwait(false))
             {
-                var groupName = GetGroupName(sender.UserName, recipient.UserName);
                 await Clients.Group(groupName).SendAsync("NewMessage", _mapper.Map<MessageDto>(message)).ConfigureAwait(false);
             }else
             {
                 throw new HubException("Failed to send message");
             }
+        }
+
+        private async Task<bool> AddToGroup(HubCallerContext context, string groupName)
+        {
+            var group = await _messageRepository.GetMessageGroupAsync(groupName).ConfigureAwait(false);
+            var connection = new Connection(context.ConnectionId, context.User.GetUsername());
+            if(group == null)
+            {
+                group = new Group(groupName);
+                _messageRepository.AddGroup(group);
+            }
+            group.Connections.Add(connection);
+
+            return await _messageRepository.SaveAllAsync().ConfigureAwait(false);
+        }
+
+        private async Task RemoveFromMessageGroup(string connectionId)
+        {
+            var connection = await _messageRepository.GetConnectionAsync(connectionId).ConfigureAwait(false);
+            _messageRepository.RemoveConnection(connection);
+            await _messageRepository.SaveAllAsync().ConfigureAwait(false);
         }
 
         private static string GetGroupName(string caller, string other)

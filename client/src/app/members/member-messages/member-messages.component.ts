@@ -1,7 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { CreateMessage } from 'src/app/models/createMessage';
 import { Message } from 'src/app/models/message';
+import { MembersService } from 'src/app/_services/members.service';
+import { MessageService } from 'src/app/_services/message.service';
 
 @Component({
   selector: 'app-member-messages',
@@ -11,14 +14,17 @@ import { Message } from 'src/app/models/message';
 export class MemberMessagesComponent implements OnInit {
   @ViewChild('sendForm') sendForm!: NgForm;
   @Input() username: string = "";
-  @Input() messages: Message[] = [];
+  // @Input() messages: Message[] = [];
   @Output() sendClick = new EventEmitter<CreateMessage>();
+  messages$!: Observable<Message[]>;
   
   content = '';
 
-  constructor() { }
+  constructor(private messageService: MessageService) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.messages$ = this.messageService.messageThread$;
+  }
 
   onSendClick() {
     if(this.content == null) {
