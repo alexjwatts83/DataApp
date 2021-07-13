@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { CreateMessage } from '../models/createMessage';
+import { Group } from '../models/group';
 import { Message } from '../models/message';
 import { User } from '../models/user';
 import { getPaginatedResults, getPaginationHeaders } from './paginationHelper';
@@ -61,6 +62,19 @@ export class MessageService {
       this.messageThread$.pipe(take(1)).subscribe((messages: Message[]) => {
         this.messageThreadSource.next([...messages, message]);
       });
+    });
+
+    this.hubConnection.on('UpdatedGroup', (group: Group) => {
+      if(group.connections.some(x => x.username === otherUsername)) {
+        this.messageThread$.pipe(take(1)).subscribe((messages: Message[]) => {
+          messages.forEach(message => {
+            if(!message.dateRead) {
+              message.dateRead = new Date(Date.now());
+            }
+          })
+          this.messageThreadSource.next([...messages]);
+        });
+      }
     });
   }
 
