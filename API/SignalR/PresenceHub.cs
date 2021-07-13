@@ -17,24 +17,25 @@ namespace API.SignalR
         }
         public override async Task OnConnectedAsync()
         {
-            await _presenceTracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
-
-            await Clients.Others.SendAsync("UserIsOnline", Context.User.GetUsername()).ConfigureAwait(false);
+            var isOnline = await _presenceTracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId).ConfigureAwait(false);
+            if(isOnline)
+            {
+                await Clients.Others.SendAsync("UserIsOnline", Context.User.GetUsername()).ConfigureAwait(false);
+            }
+            
 
             var currentUsers = await _presenceTracker.GetOnlineUsers();
 
-            await Clients.All.SendAsync("GetOnlineUsers", currentUsers).ConfigureAwait(false);
+            await Clients.Caller.SendAsync("GetOnlineUsers", currentUsers).ConfigureAwait(false);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await _presenceTracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
-
-            await Clients.Others.SendAsync("UserIsOffline", Context.User.GetUsername()).ConfigureAwait(false);
-
-            var currentUsers = await _presenceTracker.GetOnlineUsers();
-
-            await Clients.All.SendAsync("GetOnlineUsers", currentUsers).ConfigureAwait(false);
+            var isOffline = await _presenceTracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId).ConfigureAwait(false);
+            if (isOffline)
+            {
+                await Clients.Others.SendAsync("UserIsOffline", Context.User.GetUsername()).ConfigureAwait(false);
+            }
 
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
