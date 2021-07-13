@@ -4,6 +4,7 @@ import * as signalR from '@microsoft/signalr';
 import { HubConnection } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { CreateMessage } from '../models/createMessage';
 import { Message } from '../models/message';
@@ -40,7 +41,7 @@ export class MessageService {
       .withAutomaticReconnect()
       .build();
 
-    console.log({ hubConn: this.hubConnection });
+    // // console.log({ hubConn: this.hubConnection });
 
     this.hubConnection
       .start()
@@ -53,6 +54,13 @@ export class MessageService {
     this.hubConnection.on('RecievedMessageThread', (messages: Message[]) => {
       console.log('RecievedMessageThread', messages);
       this.messageThreadSource.next(messages);
+    });
+
+    this.hubConnection.on('NewMessage', (message: Message) => {
+      console.log('NewMessage', message);
+      this.messageThread$.pipe(take(1)).subscribe((messages: Message[]) => {
+        this.messageThreadSource.next([...messages, message]);
+      });
     });
   }
 
@@ -74,11 +82,13 @@ export class MessageService {
     return this.http.get<Message[]>(this.getUrl(`thread/${username}`));
   }
 
-  sendMessage(messageParams: CreateMessage) {
-    return this.http.post<Message>(this.baseUrl, messageParams);
+  async sendMessage(messageParams: CreateMessage) {
+    return this.hubConnection.invoke('SendMessage', messageParams).catch(error => console.log(error));
+    // return this.http.post<Message>(this.baseUrl, messageParams);
   }
 
   deleteMessage(id: number) {
     return this.http.delete(this.getUrl(id));
   }
 }
+  

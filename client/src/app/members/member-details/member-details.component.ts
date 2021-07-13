@@ -103,8 +103,8 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(event: CreateMessage) {
-    this.messageService.sendMessage(event).subscribe((response: Message) => {
-      this.messages.push(response);
+    this.messageService.sendMessage(event).then(() => {
+      // this.messages.push(response);
     })
   }
 }
