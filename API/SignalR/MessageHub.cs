@@ -34,21 +34,22 @@ namespace API.SignalR
         {
             var httpContext = Context.GetHttpContext();
             var otherUser = httpContext.Request.Query["user"].ToString();
-            _logger.LogInformation($"============== otherUser: '{otherUser}'");
+            //_logger.LogInformation($"============== otherUser: '{otherUser}'");
             var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
-            _logger.LogInformation($"============== groupName: '{groupName}'");
+            //_logger.LogInformation($"============== groupName: '{groupName}'");
 
             await AddToGroup(Context, groupName).ConfigureAwait(false);
             
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName).ConfigureAwait(false);
 
             var messages = await _messageRepository.GetMessageThreadAsync(Context.User.GetUsername(), otherUser).ConfigureAwait(false);
+
             await Clients.Group(groupName).SendAsync("RecievedMessageThread", messages).ConfigureAwait(false);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await RemoveFromMessageGroup(Context.ConnectionId);
+            await RemoveFromMessageGroup(Context.ConnectionId).ConfigureAwait(false);
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
 
@@ -81,6 +82,7 @@ namespace API.SignalR
 
             var groupName = GetGroupName(sender.UserName, recipient.UserName);
             var group = await _messageRepository.GetMessageGroupAsync(groupName).ConfigureAwait(false);
+
             if(group.Connections.Any(x => x.Username == recipient.UserName))
             {
                 message.DateRead = DateTime.UtcNow;
