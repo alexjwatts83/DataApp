@@ -37,13 +37,12 @@ namespace API.SignalR
         {
             var httpContext = Context.GetHttpContext();
             var otherUser = httpContext.Request.Query["user"].ToString();
-            //_logger.LogInformation($"============== otherUser: '{otherUser}'");
             var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
-            //_logger.LogInformation($"============== groupName: '{groupName}'");
             
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName).ConfigureAwait(false);
 
             var group = await AddToGroup(groupName).ConfigureAwait(false);
+
             await Clients.Group(groupName).SendAsync("UpdatedGroup", group).ConfigureAwait(false);
 
             var messages = await _unitOfWork.MessageRepository.GetMessageThreadAsync(Context.User.GetUsername(), otherUser).ConfigureAwait(false);
@@ -98,31 +97,22 @@ namespace API.SignalR
             }
             else
             {
-                _logger.LogInformation($"SendMessage ============== : recipient.UserName'{recipient.UserName}'");
-                _logger.LogInformation($"SendMessage ============== : _presenceTracker is null'{_presenceTracker == null}'");
-                var connections = await _presenceTracker.GetConnectionsForUserAsync(recipient.UserName);
-                _logger.LogInformation($"SendMessage ============== : connections.Count'{connections.Count}'");
+                var connections = await _presenceTracker.GetConnectionsForUserAsync(recipient.UserName).ConfigureAwait(false);
                 if(connections != null)
                 {
-                    _logger.LogInformation($"SendMessage ============== : {recipient.UserName} is online but not connected to the same group");
                     await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived", new
                     {
                         username = sender.UserName,
                         knownAs = sender.KnownAs
-                    });
-                    _logger.LogInformation($"SendMessage ============== : Sent message to client");
+                    }).ConfigureAwait(false);
                 }
             }
             
-            _logger.LogInformation($"SendMessage ============== : add");
             _unitOfWork.MessageRepository.AddMessage(message);
-            _logger.LogInformation($"SendMessage ============== : message added");
 
             if (await _unitOfWork.Complete().ConfigureAwait(false))
             {
-                _logger.LogInformation($"SendMessage ============== : saved");
                 await Clients.Group(groupName).SendAsync("NewMessage", _mapper.Map<MessageDto>(message)).ConfigureAwait(false);
-                _logger.LogInformation($"SendMessage ============== : hub NewMessage sent");
             }
             else
             {

@@ -65,23 +65,15 @@ namespace API.SignalR
 
         public Task<List<string>> GetConnectionsForUserAsync(string username)
         {
-            _logger.LogInformation("PresenceTracker ===================== calling GetConnectionsForUserAsync");
-            _logger.LogInformation("PresenceTracker ===================== username:"  + username);
-            _logger.LogInformation("PresenceTracker ===================== OnlineUsers:" + (OnlineUsers == null));
             List<string> connectionIds;
             lock (OnlineUsers)
             {
-                _logger.LogInformation("PresenceTracker ===================== in lock");
-                _logger.LogInformation("PresenceTracker ===================== in lock");
                 connectionIds = OnlineUsers.GetValueOrDefault(username);
-                _logger.LogInformation("PresenceTracker ===================== out of lock");
-                _logger.LogInformation("PresenceTracker ===================== connectionIds is null " + ((connectionIds == null) ? "null af" : connectionIds.Count.ToString()));
+                if (connectionIds == null)
+                {
+                    connectionIds = new List<string>();
+                }
             }
-            if(connectionIds == null)
-            {
-                connectionIds = new List<string>();
-            }
-            _logger.LogInformation("PresenceTracker ===================== unlocked");
             return Task.FromResult(connectionIds);
         }
     }
