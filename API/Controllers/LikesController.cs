@@ -16,15 +16,13 @@ namespace API.Controllers
     [EnableCors("AllowOrigin")]
     public class LikesController : BaseApiController
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ILikesRepository _likesRepository;
         private readonly ILogger<LikesController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public LikesController(IUserRepository userRepository, ILikesRepository likesRepository, ILogger<LikesController> logger)
+        public LikesController(ILogger<LikesController> logger, IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
-            _likesRepository = likesRepository;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost("{username}")]
@@ -32,8 +30,8 @@ namespace API.Controllers
         {
             var sourceUserId = User.GetUserId();
 
-            var likedUser = await _userRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
-            var sourceUser = await _likesRepository.GetUserWithLikes(sourceUserId).ConfigureAwait(false);
+            var likedUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
+            var sourceUser = await _unitOfWork.LikesRepository.GetUserWithLikes(sourceUserId).ConfigureAwait(false);
 
             _logger.LogInformation($"********************likedUser.UserName:{likedUser.UserName}********************");
             _logger.LogInformation($"********************sourceUser.UserName:{sourceUser.UserName}********************");
@@ -48,7 +46,7 @@ namespace API.Controllers
                 return BadRequest($"Cannot like yourself {sourceUser.KnownAs}, do better");
             }
 
-            var userLike = await _likesRepository.GetUserLike(sourceUserId, likedUser.Id).ConfigureAwait(false);
+            var userLike = await _unitOfWork.LikesRepository.GetUserLike(sourceUserId, likedUser.Id).ConfigureAwait(false);
 
             if(userLike != null)
             {
@@ -67,7 +65,7 @@ namespace API.Controllers
 
             sourceUser.LikedUsers.Add(userLike);
 
-            if (await _userRepository.SaveAllAsync().ConfigureAwait(false))
+            if (await _unitOfWork.Complete().ConfigureAwait(false))
             {
                 return Ok();
             }
@@ -81,7 +79,7 @@ namespace API.Controllers
             //_logger.LogInformation($"********************predicate:{predicate}********************");
             likesParams.UserId = User.GetUserId();
 
-            var users = await _likesRepository.GetUserLikes(likesParams).ConfigureAwait(false);
+            var users = await _unitOfWork.LikesRepository.GetUserLikes(likesParams).ConfigureAwait(false);
 
             Response.AddPaginationHeader(
                 users.CurrentPage,

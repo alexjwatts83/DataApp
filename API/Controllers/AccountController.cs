@@ -14,20 +14,17 @@ namespace API.Controllers
 {
     public class AccountController : BaseApiController
     {
-        private readonly ILogger<AccountController> _logger;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
         public AccountController(
-            ILogger<AccountController> logger,
             ITokenService tokenService,
             IMapper mapper,
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager)
         {
-            _logger = logger;
             _tokenService = tokenService;
             _mapper = mapper;
             _userManager = userManager;

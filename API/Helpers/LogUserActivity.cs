@@ -19,12 +19,12 @@ namespace API.Helpers
             }
 
             var userId = resultContenxt.HttpContext.User.GetUserId();
-            var respository = resultContenxt.HttpContext.RequestServices.GetService<IUserRepository>();
-            var user = await respository.GetUserByIdAsync(userId).ConfigureAwait(false);
+            var unitOfWork = resultContenxt.HttpContext.RequestServices.GetService<IUnitOfWork>();
+            var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId).ConfigureAwait(false);
 
-            user.LastActive = DateTime.Now;
+            user.LastActive = DateTime.UtcNow;
 
-            await respository.SaveAllAsync().ConfigureAwait(false);
+            await unitOfWork.Complete().ConfigureAwait(false);
         }
     }
 }

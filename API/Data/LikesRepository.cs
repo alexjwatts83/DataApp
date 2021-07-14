@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
-using API.Extentions;
 using API.Helpers;
 using API.Interface;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -18,13 +14,11 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<LikesRepository> _logger;
 
-        public LikesRepository(DataContext context, IMapper mapper, ILogger<LikesRepository> logger)
+        public LikesRepository(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
         public async Task<UserLike> GetUserLike(int sourceUserId, int likedUserdId)
         {
@@ -36,10 +30,6 @@ namespace API.Data
 
         public async Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams)
         {
-            _logger.LogInformation($"****************************************");
-            _logger.LogInformation($"********************predicate:{likesParams.Predicate}, userId:{likesParams.UserId}********************");
-            _logger.LogInformation($"****************************************");
-
             var users = _context.Users.OrderBy(x => x.UserName).AsQueryable();
             var likes = _context.Likes.AsQueryable();
             if(likesParams.Predicate == "liked")

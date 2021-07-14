@@ -9,7 +9,6 @@ using API.Interface;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -17,15 +16,12 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<MessageRepository> _logger;
 
         public MessageRepository(DataContext context,
-                                IMapper mapper,
-                                ILogger<MessageRepository> logger)
+                                IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
 
         public void AddGroup(Group group)
@@ -119,8 +115,6 @@ namespace API.Data
                 {
                     message.DateRead = DateTime.UtcNow;
                 }
-
-                await _context.SaveChangesAsync();
             }
 
             return _mapper.Map<IEnumerable<MessageDto>>(messages);
@@ -129,11 +123,6 @@ namespace API.Data
         public void RemoveConnection(Connection connection)
         {
             _context.Connections.Remove(connection);
-        }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
     }
 }

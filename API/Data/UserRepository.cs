@@ -9,7 +9,6 @@ using API.Interface;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -17,14 +16,13 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(DataContext context, IMapper mapper, ILogger<UserRepository> logger)
+        public UserRepository(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
+
         public async Task<AppUser> GetUserByIdAsync(int id)
         {
             return await _context
@@ -74,12 +72,6 @@ namespace API.Data
                 _ => query.OrderByDescending(x => x.LastActive)
             };
 
-            _logger.LogInformation($"********************CurrentUsername:{userParams.CurrentUsername}********************");
-            _logger.LogInformation($"********************Gender:{userParams.Gender}********************");
-            _logger.LogInformation($"********************MaxAge:{userParams.MaxAge}********************");
-            _logger.LogInformation($"********************MinAge:{userParams.MinAge}********************");
-            _logger.LogInformation($"********************OrderBy:{userParams.OrderBy}********************");
-
             return await PagedList<MemberDto>
                 .CreateAsync(query
                     .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
@@ -94,11 +86,6 @@ namespace API.Data
                 .Include(x => x.Photos)
                 .ToListAsync()
                 .ConfigureAwait(false);
-        }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
         }
 
         public void Update(AppUser user)

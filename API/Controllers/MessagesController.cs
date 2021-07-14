@@ -8,7 +8,6 @@ using API.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -20,19 +19,16 @@ namespace API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILogger<MessagesController> _logger;
-        private readonly IMessageRepository _messageRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public MessagesController(
             IMapper mapper,
             ILogger<MessagesController> logger,
-            IMessageRepository messageRepository,
-            IUserRepository userRepository)
+            IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
             _logger = logger;
-            _messageRepository = messageRepository;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost]
@@ -46,8 +42,8 @@ namespace API.Controllers
                 return BadRequest($"You can't send a message to yourself");
             }
             
-            var sender = await _userRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
-            var recipient = await _userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername).ConfigureAwait(false);
+            var sender = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
+            var recipient = await _unitOfWork.UserRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername).ConfigureAwait(false);
             
             if(recipient == null)
             {
@@ -63,9 +59,9 @@ namespace API.Controllers
                 Content = createMessageDto.Content
             };
 
-            _messageRepository.AddMessage(message);
+            _unitOfWork.MessageRepository.AddMessage(message);
 
-            if (await _messageRepository.SaveAllAsync().ConfigureAwait(false)) return Ok(_mapper.Map<MessageDto>(message));
+            if (await _unitOfWork.Complete().ConfigureAwait(false)) return Ok(_mapper.Map<MessageDto>(message));
 
             return BadRequest("Failed to send message");
         }
@@ -75,7 +71,7 @@ namespace API.Controllers
         {
             messageParams.Username = User.GetUsername();
 
-            var messages = await _messageRepository.GetMessagesForUserAsync(messageParams).ConfigureAwait(false);
+            var messages = await _unitOfWork.MessageRepository.GetMessagesForUserAsync(messageParams).ConfigureAwait(false);
 
             Response.AddPaginationHeader(
                 messages.CurrentPage,
@@ -86,22 +82,11 @@ namespace API.Controllers
             return Ok(messages);
         }
 
-        [HttpGet("thread/{username}")]
-        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThreadAsync(string username)
-        {
-            var currentUsername = User.GetUsername();
-            var messages = await _messageRepository
-                .GetMessageThreadAsync(currentUsername, username)
-                .ConfigureAwait(false);
-
-            return Ok(messages);
-        }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMessage(int id)
         {
             var username = User.GetUsername();
-            var message = await _messageRepository.GetMessageAsync(id).ConfigureAwait(false);
+            var message = await _unitOfWork.MessageRepository.GetMessageAsync(id).ConfigureAwait(false);
             
             if(message == null)
             {
@@ -125,10 +110,10 @@ namespace API.Controllers
 
             if(message.SenderDeleted && message.RecipientDeleted)
             {
-                _messageRepository.DeleteMessage(message);
+                _unitOfWork.MessageRepository.DeleteMessage(message);
             }
 
-            if (await _messageRepository.SaveAllAsync().ConfigureAwait(false))
+            if (await _unitOfWork.Complete().ConfigureAwait(false))
             {
                 return Ok();
             }
