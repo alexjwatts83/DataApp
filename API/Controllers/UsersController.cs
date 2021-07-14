@@ -34,11 +34,11 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<MemberDto>>> Get([FromQuery] UserParams userParams)
         {
             var username = User.GetUsername();
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username).ConfigureAwait(false);
+            var gender = await _unitOfWork.UserRepository.GetUserGender(username).ConfigureAwait(false);
             userParams.CurrentUsername = username;
             if(string.IsNullOrEmpty(userParams.Gender))
             {
-                userParams.Gender = (string.Equals(user.Gender, "male", System.StringComparison.OrdinalIgnoreCase)) ? "female" : "male";
+                userParams.Gender = (string.Equals(gender, "male", System.StringComparison.OrdinalIgnoreCase)) ? "female" : "male";
             }
 
             var memberDtos = await _unitOfWork.UserRepository.GetMembersAsync(userParams).ConfigureAwait(false);
