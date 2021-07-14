@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-test-errors',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./test-errors.component.scss']
 })
 export class TestErrorsComponent implements OnInit {
-  private baseUrl = 'https://localhost:5001/api/buggy';
+  private baseUrl = `${environment.apiUrl}`;
   validationErrors: string[] = [];
 
   constructor(private http: HttpClient) { }
@@ -15,8 +16,12 @@ export class TestErrorsComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  private getUrl(path: string) {
+    return `${this.baseUrl}/buggy/${path}`
+  }
+
   get404Error() {
-    this.http.get(`${this.baseUrl}/not-found`).subscribe(response => {
+    this.http.get(this.getUrl(`not-found`)).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
@@ -24,7 +29,7 @@ export class TestErrorsComponent implements OnInit {
   }
 
   get400Error() {
-    this.http.get(`${this.baseUrl}/bad-request`).subscribe(response => {
+    this.http.get(this.getUrl(`bad-request`)).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
@@ -32,7 +37,7 @@ export class TestErrorsComponent implements OnInit {
   }
 
   get400NoTextError() {
-    this.http.get(`${this.baseUrl}/bad-request-no-text`).subscribe(response => {
+    this.http.get(this.getUrl(`bad-request-no-text`)).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
@@ -40,7 +45,7 @@ export class TestErrorsComponent implements OnInit {
   }
 
   get500Error() {
-    this.http.get(`${this.baseUrl}/server-error`).subscribe(response => {
+    this.http.get(this.getUrl(`server-error`)).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
@@ -48,7 +53,7 @@ export class TestErrorsComponent implements OnInit {
   }
 
   get401Error() {
-    this.http.get(`${this.baseUrl}/auth`).subscribe(response => {
+    this.http.get(this.getUrl(`auth`)).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
@@ -60,7 +65,8 @@ export class TestErrorsComponent implements OnInit {
       username: '',
       password: ''
     };
-    this.http.post(`https://localhost:5001/api/account/register`,model).subscribe(response => {
+    const url = `${this.baseUrl}/account/register`;
+    this.http.post(url,model).subscribe(response => {
       console.log(response);
     }, error=> {
       console.log(error);
