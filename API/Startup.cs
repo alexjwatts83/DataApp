@@ -38,7 +38,6 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            //services.AddCors();
 
             services.AddCors(c =>
             {
@@ -69,7 +68,6 @@ namespace API
 
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
@@ -86,11 +84,15 @@ namespace API
                        .AllowCredentials();
             });
 
-            //app.UseCors();
-
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            if (!env.IsDevelopment())
+            {
+                app.UseDefaultFiles();
+                app.UseStaticFiles();
+            }
 
             app.UseEndpoints(endpoints =>
             {
@@ -98,11 +100,6 @@ namespace API
                 endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHub<MessageHub>("hubs/message");
             });
-
-            //app.UseSignalR(routes =>
-            //{
-            //    routes.MapHub<ChatHub>("/chatHub");
-            //});
         }
     }
 }
