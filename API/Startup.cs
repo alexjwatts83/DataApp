@@ -26,7 +26,7 @@ namespace API
             services.AddApplicationServices(_configuration);
 
             services.AddControllers();
-            
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -81,17 +81,15 @@ namespace API
 
             app.UseAuthorization();
 
-            if (!env.IsDevelopment())
-            {
-                app.UseDefaultFiles();
-                app.UseStaticFiles();
-            }
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHub<MessageHub>("hubs/message");
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
