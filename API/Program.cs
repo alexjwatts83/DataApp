@@ -24,18 +24,18 @@ namespace API
             var logger = services.GetRequiredService<ILogger<Program>>();
             try
             {
-                logger.LogDebug("Getting DataContext from Services");
+                logger.LogInformation("Getting DataContext from Services");
                 var context = services.GetRequiredService<DataContext>();
                 var userManager = services.GetRequiredService<UserManager<AppUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
-                logger.LogDebug("About to run migrate");
+                logger.LogInformation("About to run migrate");
                 await context.Database.MigrateAsync().ConfigureAwait(false);
 
-                logger.LogDebug("About to seed users");
+                logger.LogInformation("About to seed users");
                 await Seed.SeedUserDataAsync(userManager, roleManager).ConfigureAwait(false);
 
-                logger.LogDebug("Seed Users successfully");
+                logger.LogInformation("Seed Users successfully");
             }
             catch (Exception ex)
             {
