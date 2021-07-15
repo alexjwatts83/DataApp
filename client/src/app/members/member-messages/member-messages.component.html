@@ -1,11 +1,11 @@
 
 <div class="card">
-  <div class="card-body">
+  <div class="card-body"
+       #scrollMe
+       style="overflow: scroll; height: 605px;"
+       [scrollTop]="scrollMe.scrollHeight">
     <div *ngIf="(messages$ | async)?.length === 0"><h5>No messages yet, say hi by using the message box below</h5></div>
     <ul 
-      #scrollMe
-      style="overflow: scroll; height: 500px;"
-      [scrollTop]="scrollMe.scrollHeight"
       *ngIf="messages$ | async as messages" class="chat">
       <li *ngFor="let message of messages">
         <div>
@@ -17,7 +17,6 @@
             <small class="text-muted">
               <span class="fa fa-clock-o">{{ message.messageSent | timeago }}</span>
               <span class="text-danger" *ngIf="!message.dateRead && message.senderUsername !== username">
-                <!-- (unread) -->
                 <span class="ml-2 fa fa-eye-slash"></span>
               </span>
               <span class="text-success" *ngIf="message.dateRead && message.senderUsername !== username">
@@ -37,7 +36,10 @@
       <div class="input-group">
         <input type="text" class="form-control input-sm" required="true" placeholder="Send a private message" name="content" [(ngModel)]="content" />
         <div class="input-group-append">
-          <button class="btn btn-primary" type="submit" [disabled]="!sendForm.valid">Send</button>
+          <button class="btn btn-primary" type="submit" [disabled]="!sendForm.valid || isLoading">
+            <i *ngIf="!isLoading" class="fa fa-paper-plane"></i>
+            <i *ngIf="isLoading" class="fa fa-spinner"></i>
+          </button>
         </div>
       </div>
     </form>

@@ -14,10 +14,10 @@ import { MessageService } from 'src/app/_services/message.service';
 export class MemberMessagesComponent implements OnInit {
   @ViewChild('sendForm') sendForm!: NgForm;
   @Input() username: string = "";
-  // @Input() messages: Message[] = [];
+  @Input() isLoading: boolean = false;
   @Output() sendClick = new EventEmitter<CreateMessage>();
+
   messages$!: Observable<Message[]>;
-  
   content = '';
 
   constructor(private messageService: MessageService) { }

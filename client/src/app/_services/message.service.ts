@@ -10,6 +10,7 @@ import { CreateMessage } from '../models/createMessage';
 import { Group } from '../models/group';
 import { Message } from '../models/message';
 import { User } from '../models/user';
+import { BusyService } from './busy.service';
 import { getPaginatedResults, getPaginationHeaders } from './paginationHelper';
 
 @Injectable({
@@ -23,7 +24,7 @@ export class MessageService {
   private messageThreadSource = new BehaviorSubject<Message[]>([]);
   messageThread$ = this.messageThreadSource.asObservable();
 
-  constructor(private http: HttpClient, private toastr: ToastrService) {}
+  constructor(private http: HttpClient, private toastr: ToastrService, private busyService: BusyService) {}
 
   private getUrl(path: string | number): string {
     return `${this.baseUrl}/${path}`;
@@ -31,25 +32,30 @@ export class MessageService {
 
   createHubConnection(user: User, otherUsername: string) {
     console.log('connecting to message hub', user);
+    
+    this.busyService.busy();
 
     const options = {
       accessTokenFactory: () => user.token,
       transport: signalR.HttpTransportType.WebSockets,
     };
+
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${this.hubUrl}?user=${otherUsername}`, options)
       .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();
 
-    // // console.log({ hubConn: this.hubConnection });
-
     this.hubConnection
       .start()
-      .then(() => console.log('Connected to hubs/message'))
+      .then(() => {
+        console.log('Connected to hubs/message');
+      })
       .catch((error) => {
         this.toastr.error('Failed to connect to hubs/message');
         console.log(error);
+      }).finally(() => {
+        this.busyService.idle();
       });
 
     this.hubConnection.on('RecievedMessageThread', (messages: Message[]) => {
@@ -82,6 +88,7 @@ export class MessageService {
     if (!this.hubConnection) {
       return;
     }
+    this.messageThreadSource.next([]);
     this.hubConnection.stop().catch((error) => console.error(error));
   }
 

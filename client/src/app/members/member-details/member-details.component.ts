@@ -28,6 +28,7 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   user!: User;
 
   messages: Message[] = [];
+  isLoading = false;
 
   constructor(
     public presenceService: PresenceService,
@@ -105,8 +106,13 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(event: CreateMessage) {
+    this.isLoading = true;
     this.messageService.sendMessage(event).then(() => {
       // this.messages.push(response);
-    })
+    }).finally(() => {
+      setTimeout(()=>{
+        this.isLoading = false;
+      }, 300);
+    });
   }
 }
