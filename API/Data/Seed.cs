@@ -65,9 +65,6 @@ namespace API.Data
             await userManager
                 .AddToRolesAsync(admin, new[] { "Admin", "Moderator" })
                 .ConfigureAwait(false);
-
-            var rolesFromManager = await roleManager.Roles.ToListAsync().ConfigureAwait(false);
-            var adminName = await roleManager.Roles.FirstOrDefaultAsync(x => x.Name.ToLower() == "admin");
         }
     }
 }
